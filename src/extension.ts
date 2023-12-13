@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { getAppPath } from 'steam-path';
-import { MapEditorProvider } from './editor/mapEditor';
+import MapEditorProvider from './editor/MapEditorProvider';
 
 const CELESTE_APP_ID = 504230;
 

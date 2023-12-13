@@ -1,0 +1,9 @@
+sprite: 
+  - texture:
+      expression: "switch"
+      value: "$mode"
+      default: "objects/campfire/fire00"
+      map:
+        lit: "objects/campfire/fire08"
+        smoking: "objects/campfire/smoking04"
+    anchor: [0.5, 1]

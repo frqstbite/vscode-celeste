@@ -1,22 +1,30 @@
 import * as vscode from 'vscode';
-import Map from './celeste/Map';
-import BinaryBuffer from './celeste/mapformat/BinaryBuffer';
-import StringLookup from './celeste/mapformat/StringLookup';
+import * as path from 'path';
 
-async function readFile(uri: vscode.Uri): Promise<Uint8Array> {
-    if (uri.scheme === 'untitled') { //Unsaved documents always start empty
-        return new Uint8Array(0);
-    }
-    return await vscode.workspace.fs.readFile(uri);
-}
+import Element from '../celeste/Element';
+import BinaryBuffer from '../celeste/BinaryBuffer';
+import StringLookup from '../celeste/StringLookup';
 
-// Handles bridging the gap between vscode and the Map class, including serialization
+const HEADER = "CELESTE MAPS";
+const EXTENSION = "bin";
+
+// Handles bridging the gap between vscode and Element abstraction, including serialization
 export default class MapDocument implements vscode.Disposable, vscode.CustomDocument {
     uri: vscode.Uri;
-    map: Map;
+    map: Element;
 
     constructor(uri: vscode.Uri, data: Uint8Array) {
         this.uri = uri;
+
+		const buffer = new BinaryBuffer(data);
+		const header = buffer.readString();
+		if (header !== HEADER) {
+			throw new Error("Invalid header");
+		}
+
+        buffer.readString(); //Package name
+        const lookup = StringLookup.deserialize(buffer);
+		this.map = Element.deserialize(buffer, lookup);
     }
 
     dispose(): void {
@@ -30,7 +38,9 @@ export default class MapDocument implements vscode.Disposable, vscode.CustomDocu
 	async saveAs(target: vscode.Uri, cancellation: vscode.CancellationToken): Promise<void> {
         const lookup = new StringLookup();
 		const buffer = new BinaryBuffer();
-        this.map.toElement().serialize(buffer, lookup);
+		buffer.writeString(HEADER);
+		buffer.writeString(path.basename(target.path, '.' + EXTENSION)); //Package name
+        this.map.serialize(buffer, lookup);
 
 		if (cancellation.isCancellationRequested) {
 			return;

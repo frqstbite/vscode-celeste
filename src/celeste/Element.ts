@@ -1,10 +1,6 @@
 import BinaryBuffer from "./BinaryBuffer";
 import StringLookup from "./StringLookup";
 
-export interface ElementSerializable {
-    toElement(): Element;
-}
-
 export enum AttributeEncoding {
     Boolean,
     Byte,
@@ -22,8 +18,8 @@ type Attribute = [AttributeEncoding, any];
 
 export default class Element {
     type: string;
-    attributes: Map<string, Attribute> = new Map();
-    children: Set<Element> = new Set();
+    private _attributes: Map<string, Attribute> = new Map();
+    private _children: Set<Element> = new Set();
 
     static deserialize(buffer: BinaryBuffer, lookup: StringLookup): Element {
         const element = new Element(lookup.getString(buffer.readShort()));
@@ -83,20 +79,20 @@ export default class Element {
     }
 
     setAttribute(name: string, encoding: AttributeEncoding, value: any) {
-        this.attributes.set(name, [encoding, value]);
+        this._attributes.set(name, [encoding, value]);
     }
 
     getAttribute(name: string): any | undefined {
-        const attr = this.attributes.get(name);
+        const attr = this._attributes.get(name);
         return attr ? attr[1] : undefined;
     }
     
     addChild(child: Element) {
-        this.children.add(child);
+        this._children.add(child);
     }
 
-    getChild(type: string): Element | undefined {
-        for (const child of this.children) {
+    child(type: string): Element | undefined {
+        for (const child of this._children) {
             if (child.type === type) {
                 return child;
             }
@@ -104,9 +100,9 @@ export default class Element {
         return undefined;
     }
 
-    getChildren(type: string): Element[] {
+    children(type: string): Element[] {
         const children: Element[] = [];
-        for (const child of this.children) {
+        for (const child of this._children) {
             if (child.type === type) {
                 children.push(child);
             }
@@ -118,8 +114,8 @@ export default class Element {
         buffer.writeShort(lookup.getLookupIndex(this.type));
 
         // Attributes
-        buffer.writeByte(this.attributes.size);
-        for (const [name, [encoding, value]] of this.attributes.entries()) {
+        buffer.writeByte(this._attributes.size);
+        for (const [name, [encoding, value]] of this._attributes.entries()) {
             buffer.writeShort(lookup.getLookupIndex(name));
             buffer.writeByte(encoding);
             switch (encoding) {
@@ -157,8 +153,8 @@ export default class Element {
         }
 
         // Children
-        buffer.writeShort(this.children.size);
-        for (const child of this.children) {
+        buffer.writeShort(this._children.size);
+        for (const child of this._children) {
             child.serialize(buffer, lookup);
         }
     }
