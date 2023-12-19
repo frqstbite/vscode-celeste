@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { getAppPath } from 'steam-path';
 import MapEditorProvider from './editor/MapEditorProvider';
+import registerSchemas from './schemas';
 
 const CELESTE_APP_ID = 504230;
 
@@ -11,7 +12,15 @@ export async function activate(context: vscode.ExtensionContext) {
 		return;
 	}
 
+	// Set up map editor
 	context.subscriptions.push(MapEditorProvider.register(context));
+
+	// Register YAML schemas, if the extension is installed
+	const yamlExtension = vscode.extensions.getExtension("redhat.vscode-yaml");
+	if (yamlExtension) {
+		const yamlExtensionAPI = await vscode.extensions.getExtension("redhat.vscode-yaml")!.activate();
+		registerSchemas(yamlExtensionAPI.registerContributor);
+	}
 }
 
 export function deactivate() {}
