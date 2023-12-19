@@ -1,4 +1,4 @@
-import BinaryBuffer from "./BinaryBuffer";
+import BinaryBuffer from "../serialization/BinaryBuffer";
 import StringLookup from "./StringLookup";
 
 export enum AttributeEncoding {

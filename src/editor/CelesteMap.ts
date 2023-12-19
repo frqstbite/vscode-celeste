@@ -1,17 +1,32 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-import Element from '../celeste/Element';
-import BinaryBuffer from '../celeste/BinaryBuffer';
-import StringLookup from '../celeste/StringLookup';
+import Element from './Element';
+import BinaryBuffer from '../serialization/BinaryBuffer';
+import StringLookup from './StringLookup';
 
 const HEADER = "CELESTE MAPS";
 const EXTENSION = "bin";
 
-// Handles bridging the gap between vscode and Element abstraction, including serialization
-export default class MapDocument implements vscode.Disposable, vscode.CustomDocument {
+async function readFile(uri: vscode.Uri): Promise<Uint8Array> {
+    if (uri.scheme === 'untitled') { //Unsaved documents always start empty
+        return new Uint8Array(0);
+    }
+    return await vscode.workspace.fs.readFile(uri);
+}
+
+
+
+// CustomDocument for Celeste maps
+// Handles serialization and edit tracking
+export default class CelesteMap implements vscode.Disposable, vscode.CustomDocument {
     uri: vscode.Uri;
-    map: Element;
+    structure: Element;
+
+	static async open(uri: vscode.Uri): Promise<CelesteMap> {
+		const data = await readFile(uri);
+		return new CelesteMap(uri, data);
+	}
 
     constructor(uri: vscode.Uri, data: Uint8Array) {
         this.uri = uri;
@@ -24,7 +39,7 @@ export default class MapDocument implements vscode.Disposable, vscode.CustomDocu
 
         buffer.readString(); //Package name
         const lookup = StringLookup.deserialize(buffer);
-		this.map = Element.deserialize(buffer, lookup);
+		this.structure = Element.deserialize(buffer, lookup);
     }
 
     dispose(): void {
@@ -40,7 +55,7 @@ export default class MapDocument implements vscode.Disposable, vscode.CustomDocu
 		const buffer = new BinaryBuffer();
 		buffer.writeString(HEADER);
 		buffer.writeString(path.basename(target.path, '.' + EXTENSION)); //Package name
-        this.map.serialize(buffer, lookup);
+        this.structure.serialize(buffer, lookup);
 
 		if (cancellation.isCancellationRequested) {
 			return;
@@ -50,7 +65,8 @@ export default class MapDocument implements vscode.Disposable, vscode.CustomDocu
 	}
 
     async revert(_cancellation: vscode.CancellationToken): Promise<void> {
-
+		const diskContent = await readFile(this.uri);
+		
     }
 
     async backup(destination: vscode.Uri, cancellation: vscode.CancellationToken): Promise<vscode.CustomDocumentBackup> {

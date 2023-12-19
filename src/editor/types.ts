@@ -4,9 +4,3 @@ export type WindPattern =
     'LeftOnOff'  | 'RightOnOff'   | 'LeftOnOffFast' | 'RightOnOffFast' |
     'RightCrazy' | 'LeftGemsOnly' | 'Alternating'   | string           ;
 
-export type Rect = {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-};

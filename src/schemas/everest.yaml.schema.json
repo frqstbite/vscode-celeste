@@ -1,0 +1,58 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Everest Manifest Schema",
+    "description": "Describes Everest mod metadata",
+
+    "type": "array",
+    "items": { "$ref": "#/$defs/modDefinition" },
+
+    "$defs": {
+        "mod": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "type": "string",
+                    "description": "The mod's name"
+                },
+
+                "Version": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "The mod's version number"
+                }
+            },
+            "required": ["Name", "Version"]
+        },
+
+        "dependencies": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "$ref": "#/$defs/mod"
+            }
+        },
+
+        "modDefinition": {
+            "type": "object",
+            "allOf": [
+                { "$ref": "#/$defs/mod" },
+                {
+                    "properties": {
+                        "DLL": {
+                            "type": "string",
+                            "description": "Path to the mod's DLL file, relative to ./Code"
+                        },
+                        "Dependencies": {
+                            "$ref": "#/$defs/dependencies",
+                            "description": "Mods that this mod depends on, including Everest itself."
+                        },
+                        "OptionalDependencies": {
+                            "$ref": "#/$defs/dependencies",
+                            "description": "Mods that this mod supports, but does not require."
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

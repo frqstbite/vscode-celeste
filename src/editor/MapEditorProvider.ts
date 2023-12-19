@@ -1,16 +1,10 @@
 import * as vscode from 'vscode';
-import MapDocument from './MapDocument';
+import WebviewCollection from 'WebviewCollection';
+import CelesteMap from './CelesteMap';
 
 const VIEW_TYPE = "celeste.mapEditor";
 
-async function readFile(uri: vscode.Uri): Promise<Uint8Array> {
-    if (uri.scheme === 'untitled') { //Unsaved documents always start empty
-        return new Uint8Array(0);
-    }
-    return await vscode.workspace.fs.readFile(uri);
-}
-
-export default class MapEditorProvider implements vscode.CustomEditorProvider<MapDocument> {
+export default class MapEditorProvider implements vscode.CustomEditorProvider<CelesteMap> {
     public static register(context: vscode.ExtensionContext): vscode.Disposable {
         return vscode.window.registerCustomEditorProvider(
             VIEW_TYPE,
@@ -23,35 +17,36 @@ export default class MapEditorProvider implements vscode.CustomEditorProvider<Ma
         );
     }
 
+    private readonly webviews = new WebviewCollection();
+
     constructor(context: vscode.ExtensionContext) {
 
     }
 
-    private readonly _onDidChangeCustomDocument = new vscode.EventEmitter<vscode.CustomDocumentEditEvent<MapDocument>>();
+    private readonly _onDidChangeCustomDocument = new vscode.EventEmitter<vscode.CustomDocumentEditEvent<CelesteMap>>();
 	public readonly onDidChangeCustomDocument = this._onDidChangeCustomDocument.event;
 
-    async openCustomDocument(uri: vscode.Uri, openContext: vscode.CustomDocumentOpenContext, token: vscode.CancellationToken): Promise<MapDocument> {
-        const data = await readFile(uri);
-        return new MapDocument(uri, data);
+    async openCustomDocument(uri: vscode.Uri, openContext: vscode.CustomDocumentOpenContext, token: vscode.CancellationToken): Promise<CelesteMap> {
+        return CelesteMap.open(uri);
     }
 
-    async saveCustomDocument(document: MapDocument, cancellation: vscode.CancellationToken): Promise<void> {
+    async saveCustomDocument(document: CelesteMap, cancellation: vscode.CancellationToken): Promise<void> {
         await document.save(cancellation);
     }
 
-    async saveCustomDocumentAs(document: MapDocument, destination: vscode.Uri, cancellation: vscode.CancellationToken): Promise<void> {
+    async saveCustomDocumentAs(document: CelesteMap, destination: vscode.Uri, cancellation: vscode.CancellationToken): Promise<void> {
         await document.saveAs(destination, cancellation);
     }
 
-    revertCustomDocument(document: MapDocument, cancellation: vscode.CancellationToken): Promise<void> {
+    async revertCustomDocument(document: CelesteMap, cancellation: vscode.CancellationToken): Promise<void> {
+        await document.revert(cancellation);
+    }
+
+    backupCustomDocument(document: CelesteMap, context: vscode.CustomDocumentBackupContext, cancellation: vscode.CancellationToken): Thenable<vscode.CustomDocumentBackup> {
         throw new Error('Method not implemented.');
     }
 
-    backupCustomDocument(document: MapDocument, context: vscode.CustomDocumentBackupContext, cancellation: vscode.CancellationToken): Thenable<vscode.CustomDocumentBackup> {
-        throw new Error('Method not implemented.');
-    }
-
-    resolveCustomEditor(document: MapDocument, webviewPanel: vscode.WebviewPanel, token: vscode.CancellationToken): void | Thenable<void> {
+    resolveCustomEditor(document: CelesteMap, webviewPanel: vscode.WebviewPanel, token: vscode.CancellationToken): void | Thenable<void> {
         throw new Error('Method not implemented.');
     }
 }
