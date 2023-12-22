@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import WebviewCollection from 'WebviewCollection';
+import WebviewCollection from '../WebviewCollection';
 import CelesteMap from './CelesteMap';
 
 const VIEW_TYPE = "celeste.mapEditor";

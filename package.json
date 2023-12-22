@@ -3,21 +3,18 @@
   "displayName": "Celeste",
   "description": "Must-have extension for Celeste modders working with Everest.",
   "version": "0.0.1",
+  "publisher": "frqstbite",
   "engines": {
     "vscode": "^1.84.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "celeste.helloWorld",
-        "title": "Hello World"
-      }
-    ],
     "customEditors": [
       {
         "viewType": "celeste.mapEditor",
@@ -28,6 +25,9 @@
           }
         ]
       }
+    ],
+    "yamlValidation": [
+
     ]
   },
   "scripts": {

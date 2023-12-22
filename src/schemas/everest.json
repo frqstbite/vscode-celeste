@@ -12,13 +12,13 @@
             "properties": {
                 "Name": {
                     "type": "string",
-                    "description": "The mod's name"
+                    "description": "The mod's name."
                 },
 
                 "Version": {
-                    "type": "number",
-                    "minimum": 0,
-                    "description": "The mod's version number"
+                    "type": "string",
+                    "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+                    "description": "The mod's version number."
                 }
             },
             "required": ["Name", "Version"]
