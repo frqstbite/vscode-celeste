@@ -1,9 +1,14 @@
 minimumSize: [16, 16]
-
-
+attributes:
+  - name: "direction"
+    type: "enum"
+    values: ["Up", "Left", "Right"]
+    default: "Up"
+  - name: "canSteer"
+    type: "boolean"
+    default: false
 
 sprites:
-
   # Buttons
   - expression: "boolean"
     value: "$canSteer"
@@ -14,15 +19,15 @@ sprites:
           type: "slice"
           center: [8, 0, -8, -0]
         anchor: [0.5, 0.5]
-        position: [ [1, 0.5], 0 ]
-      
+        position: [[1, 0.5], 0]
+
       # Left
       - texture:
           source: "objects/moveBlock/button"
           type: "slice"
           center: [8, 0, -8, -0]
         anchor: [0.5, 0.5]
-        position: [ 1, [0, 0.5] ]
+        position: [1, [0, 0.5]]
         rotate: 90
 
       # Right
@@ -31,7 +36,7 @@ sprites:
           type: "slice"
           center: [8, 0, -8, -0]
         anchor: [0.5, 0.5]
-        position: [ -1, [0, 0.5] ]
+        position: [-1, [0, 0.5]]
         rotate: -90
 
   # Base
@@ -50,7 +55,7 @@ sprites:
             Right: "objects/moveBlock/base_h"
       type: "slice"
       center: [8, 8, -8, -8]
-    size: [ [0, 1], [0, 1] ]
+    size: [[0, 1], [0, 1]]
 
   # Arrow
   - texture:
@@ -62,5 +67,5 @@ sprites:
         Left: "objects/moveBlock/arrow04"
         Right: "objects/moveBlock/arrow00"
     anchor: [0.5, 0.5]
-    position: [ [0, 0.5], [0, 0.5] ]
+    position: [[0, 0.5], [0, 0.5]]
     backgroundColor: [59, 50, 101]

@@ -1,5 +1,5 @@
 import BinaryBuffer from "../serialization/BinaryBuffer";
-import StringLookup from "./StringLookup";
+import StringLookup from "../serialization/StringLookup";
 
 export enum AttributeEncoding {
     Boolean,
@@ -17,12 +17,12 @@ export enum AttributeEncoding {
 type Attribute = [AttributeEncoding, any];
 
 export default class Element {
-    type: string;
     private _attributes: Map<string, Attribute> = new Map();
-    private _children: Set<Element> = new Set();
+    private _parent?: Element;
+    protected _children: Set<Element> = new Set();
 
-    static deserialize(buffer: BinaryBuffer, lookup: StringLookup): Element {
-        const element = new Element(lookup.getString(buffer.readShort()));
+    static deserialize(buffer: BinaryBuffer, lookup: StringLookup, parent?: Element): Element {
+        const element = new Element(lookup.getString(buffer.readShort()), parent);
 
         // Attributes
         const attributeCount = buffer.readByte();
@@ -68,15 +68,16 @@ export default class Element {
         // Children
         const childCount = buffer.readShort();
         for (let i = 0; i < childCount; i++) {
-            element.addChild(Element.deserialize(buffer, lookup));
+            Element.deserialize(buffer, lookup, element);
         }
 
         return element;
     }
 
-    constructor(type: string) {
-        this.type = type;
-    }
+    constructor(
+        public readonly type: string,
+        public readonly parent?: Element
+    ) {}
 
     setAttribute(name: string, encoding: AttributeEncoding, value: any) {
         this._attributes.set(name, [encoding, value]);
@@ -86,11 +87,20 @@ export default class Element {
         const attr = this._attributes.get(name);
         return attr ? attr[1] : undefined;
     }
-    
-    addChild(child: Element) {
-        this._children.add(child);
+
+    /**
+     * Delete this element from the hierarchy.
+     */
+    delete() {
+        this._parent?._children.delete(this);
+        this._parent = undefined;
     }
 
+    /**
+     * Return a child element of the specified type
+     * @param type 
+     * @returns 
+     */
     child(type: string): Element | undefined {
         for (const child of this._children) {
             if (child.type === type) {
@@ -100,10 +110,10 @@ export default class Element {
         return undefined;
     }
 
-    children(type: string): Element[] {
+    children(type?: string): Element[] {
         const children: Element[] = [];
         for (const child of this._children) {
-            if (child.type === type) {
+            if (!type || child.type === type) {
                 children.push(child);
             }
         }

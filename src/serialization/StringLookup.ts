@@ -1,4 +1,4 @@
-import BinaryBuffer from "../serialization/BinaryBuffer";
+import BinaryBuffer from "./BinaryBuffer";
 
 export default class StringLookup {
     lookup: string[] = [];

@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import Element from './Element';
 import BinaryBuffer from '../serialization/BinaryBuffer';
-import StringLookup from './StringLookup';
+import StringLookup from '../serialization/StringLookup';
 
 const HEADER = "CELESTE MAPS";
 const EXTENSION = "bin";
@@ -19,13 +19,13 @@ async function readFile(uri: vscode.Uri): Promise<Uint8Array> {
 
 // CustomDocument for Celeste maps
 // Handles serialization and edit tracking
-export default class CelesteMap implements vscode.Disposable, vscode.CustomDocument {
+export default class CelesteMapDocument implements vscode.Disposable, vscode.CustomDocument {
     uri: vscode.Uri;
     structure: Element;
 
-	static async open(uri: vscode.Uri): Promise<CelesteMap> {
+	static async open(uri: vscode.Uri): Promise<CelesteMapDocument> {
 		const data = await readFile(uri);
-		return new CelesteMap(uri, data);
+		return new CelesteMapDocument(uri, data);
 	}
 
     constructor(uri: vscode.Uri, data: Uint8Array) {

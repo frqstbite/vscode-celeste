@@ -26,9 +26,29 @@
         ]
       }
     ],
-    "yamlValidation": [
-
-    ]
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "celeste",
+          "title": "Celeste",
+          "icon": "assets/everest.png"
+        }
+      ]
+    },
+    "views": {
+      "celeste": [
+        {
+          "id": "celeste.attributeEditor",
+          "name": "Attribute Editor",
+          "icon": ""
+        },
+        {
+          "id": "celeste.mapGraph",
+          "name": "Map Graph",
+          "icon": ""
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
