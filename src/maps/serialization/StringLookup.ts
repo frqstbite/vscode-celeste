@@ -1,4 +1,4 @@
-import BinaryBuffer from "./BinaryBuffer";
+import BinaryBuffer from "./BinaryBuffer.js";
 
 export default class StringLookup {
     lookup: string[] = [];
