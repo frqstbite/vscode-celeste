@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="Data">
+        <xs:complexType>
+            <xs:sequence>
+
+                <xs:element name="sprite" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:attribute name="name" type="xs:string" use="required"/>
+                        <xs:attribute name="path" type="xs:string" use="required"/>
+                        <xs:attribute name="delay" type="xs:decimal" />
+                        <xs:attribute name="posX" type="xs:decimal" />
+                        <xs:attribute name="posY" type="xs:decimal" />
+                        <xs:attribute name="origX" type="xs:decimal" />
+                        <xs:attribute name="origY" type="xs:decimal" />
+                    </xs:complexType>
+                </xs:element>
+
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

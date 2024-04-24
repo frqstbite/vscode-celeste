@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <!-- TYPES -->
+    <xs:simpleType name="tilesets">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\*|[A-Za-z0-9](,\s*[A-Za-z0-9])*" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="tiles">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d+,\s*\d+(;\s*\d+,\s*\d+)*" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="sprites">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-Za-z0-9_]+(,\s*[A-Za-z0-9_]+)*" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="mask">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="padding|center|fill\d+|[0-9A-Za-z]{3}\-[0-9A-Za-z]{3}\-[0-9A-Za-z]{3}" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    
+    <!-- DOCUMENT -->
+    <xs:element name="Data">
+        <xs:complexType>
+            <xs:sequence>
+
+                <xs:element name="Tileset" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:sequence>
+
+                            <!-- SET -->
+                            <xs:element name="set" minOccurs="0" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:attribute name="mask" type="mask" use="required" />
+                                    <xs:attribute name="tiles" type="tiles" use="required" />
+                                    <xs:attribute name="sprites" type="sprites" />
+                                </xs:complexType>
+                            </xs:element>
+
+                            <!-- DEFINE -->
+                            <xs:element name="define" minOccurs="0" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:attribute name="id" use="required">
+                                        <xs:simpleType>
+                                            <xs:restriction base="xs:string">
+                                                <xs:pattern value="[2-9A-Za-z]" />
+                                            </xs:restriction>
+                                        </xs:simpleType>
+                                    </xs:attribute>
+                                    <xs:attribute name="filter" type="tilesets" use="required" />
+                                    <xs:attribute name="ignore" type="xs:boolean" use="required" />
+                                </xs:complexType>
+                            </xs:element>
+
+                        </xs:sequence>
+
+                        <xs:attribute name="id" type="xs:string" use="required"/>
+                        <xs:attribute name="path" type="xs:string" use="required"/>
+                        <xs:attribute name="copy" type="xs:string" />
+                        <xs:attribute name="ignores" type="tilesets" />
+                        <xs:attribute name="sound" type="xs:nonNegativeInteger" />
+                        <xs:attribute name="scanWidth" type="xs:integer" />
+                        <xs:attribute name="scanHeight" type="xs:integer" />
+                    </xs:complexType>
+                </xs:element>
+
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:simpleType name="Frames">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(,?((\d+\-\d+)|(\d+\*\d+)|(\d+)))+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- COMMON ATTRIBUTE GROUPS -->
+    <xs:attributeGroup name="offset">
+        <xs:attribute name="offsetX" type="xs:decimal" />
+        <xs:attribute name="offsetY" type="xs:decimal" />
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="bounding">
+        <xs:attribute name="x" type="xs:decimal" />
+        <xs:attribute name="y" type="xs:decimal" />
+        <xs:attribute name="width" type="xs:decimal" />
+        <xs:attribute name="height" type="xs:decimal" />
+    </xs:attributeGroup>
+
+
+    <!-- PROPERTIES -->
+    <xs:group name="properties">
+        <xs:all>
+            <xs:element name="animation" minOccurs="0">
+                <xs:complexType>
+                    <xs:attribute name="frames" type="Frames" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="banner" minOccurs="0">
+                <xs:complexType>
+                    <xs:attribute name="speed" type="xs:decimal" />
+                    <xs:attribute name="amplitude" type="xs:decimal" />
+                    <xs:attribute name="sliceSize" type="xs:positiveInteger" />
+                    <xs:attribute name="sliceSinIncrement" type="xs:decimal" />
+                    <xs:attribute name="easeDown" type="xs:boolean" />
+                    <xs:attribute name="offset" type="xs:float" />
+                    <xs:attribute name="onlyIfWindy" type="xs:boolean" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="floaty" minOccurs="0"></xs:element>
+
+            <xs:element name="smoke" minOccurs="0"> <!-- can be applied multiple times -->
+                <xs:complexType>
+                    <xs:attributeGroup ref="offset" />
+                    <xs:attribute name="inbg" type="xs:boolean" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="parallax" minOccurs="0">
+                <xs:complexType>
+                    <xs:attribute name="amount" type="xs:decimal" use="required" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="depth" minOccurs="0">
+                <xs:complexType>
+                    <xs:attribute name="value" type="xs:integer" use="required" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="animationSpeed" minOccurs="0">
+                <xs:complexType>
+                    <xs:attribute name="value" type="xs:integer" use="required" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="sound" minOccurs="0">
+                <xs:complexType>
+                    <xs:attribute name="event" type="xs:string" use="required" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="bloom" minOccurs="0"> <!-- can be applied multiple times -->
+                <xs:complexType>
+                    <xs:attributeGroup ref="offset" />
+                    <xs:attribute name="alpha" type="xs:decimal" />
+                    <xs:attribute name="radius" type="xs:decimal" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="coreSwap" minOccurs="0">
+                <xs:complexType>
+                    <xs:attribute name="coldPath" type="xs:string" use="required" />
+                    <xs:attribute name="hotPath" type="xs:string" use="required" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="flagSwap" minOccurs="0">
+                <xs:complexType>
+                    <xs:attribute name="flag" type="xs:string" use="required" />
+                    <xs:attribute name="offPath" type="xs:string" use="required" />
+                    <xs:attribute name="onPath" type="xs:string" use="required" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="mirror" minOccurs="0">
+                <xs:complexType>
+                    <xs:attribute name="keepOffsetsClose" type="xs:boolean" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="solid" minOccurs="0"> <!-- can be applied multiple times -->
+                <xs:complexType>
+                    <xs:attributeGroup ref="bounding" />
+                    <xs:attribute name="index" type="xs:nonNegativeInteger" />
+                    <xs:attribute name="blockWaterfalls" type="xs:boolean" />
+                    <xs:attribute name="safe" type="xs:boolean" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="staticMover" minOccurs="0">
+                <xs:complexType>
+                    <xs:attributeGroup ref="bounding" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="scared" minOccurs="0">
+                <xs:complexType>
+                    <xs:attribute name="range" type="xs:positiveInteger" />
+                    <xs:attribute name="hideRange" type="xs:positiveInteger" />
+                    <xs:attribute name="showRange" type="xs:positiveInteger" />
+
+                    <xs:attribute name="idleFrames" type="Frames" />
+                    <xs:attribute name="hideFrames" type="Frames" />
+                    <xs:attribute name="hiddenFrames" type="Frames" />
+                    <xs:attribute name="showFrames" type="Frames" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="light" minOccurs="0"> <!-- can be applied multiple times -->
+                <xs:complexType>
+                    <xs:attributeGroup ref="offset" />
+                    <xs:attribute name="color" type="xs:string" />
+                    <xs:attribute name="alpha" type="xs:decimal" />
+                    <xs:attribute name="startFade" type="xs:positiveInteger" />
+                    <xs:attribute name="endFade" type="xs:positiveInteger" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="lightOcclude" minOccurs="0"> <!-- can be applied multiple times -->
+                <xs:complexType>
+                    <xs:attributeGroup ref="bounding" />
+                    <xs:attribute name="alpha" type="xs:decimal" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="overlay" minOccurs="0"></xs:element>
+
+            <xs:element name="scale" minOccurs="0">
+                <xs:complexType>
+                    <xs:attribute name="multiplyX" type="xs:decimal" />
+                    <xs:attribute name="multiplyY" type="xs:decimal" />
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="randomizeFrame" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:group>
+
+
+    <!-- DECALS -->
+    <xs:element name="decals">
+        <xs:complexType>
+            <xs:sequence>
+
+                <!-- DECAL -->
+                <xs:element name="decal" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:group ref="properties" />
+                        <xs:attribute name="path" type="xs:string" use="required"/>
+                    </xs:complexType>
+                </xs:element>
+
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

@@ -125,6 +125,7 @@
 
         "Mountain": {
             "type": "object",
+            "description": "Definitions for how the 3D viewport in the menu should appear.",
             "properties": {
                 "Idle": { "$ref": "#/$defs/ray3d" },
                 "Select": { "$ref": "#/$defs/ray3d" },
