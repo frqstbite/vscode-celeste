@@ -26,6 +26,16 @@
         ]
       }
     ],
+    "jsonValidation": [
+      {
+        "fileMatch": "**/everest.json",
+        "url": "./src/schemas/everest.json"
+      },
+      {
+        "fileMatch": "**/Maps/**/*.meta.json",
+        "url": "./src/schemas/map.meta.json"
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -40,32 +50,32 @@
         {
           "id": "celeste.attributeEditor",
           "name": "Attribute Editor",
-          "icon": ""
+          "icon": "assets/everest.png"
         },
         {
           "id": "celeste.mapGraph",
           "name": "Map Graph",
-          "icon": ""
+          "icon": "assets/everest.png"
         }
       ]
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
+    "clean": "rimraf out/",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{json,xml,xsd,yaml,yml}\" out/",
+    "compile": "npm run clean && tsc -p ./ && npm run copyfiles",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "pretest": "npm run compile && npm run lint"
   },
   "devDependencies": {
     "@types/node": "18.x",
     "@types/vscode": "^1.84.0",
-    "@typescript-eslint/eslint-plugin": "^6.9.0",
-    "@typescript-eslint/parser": "^6.9.0",
     "@vscode/test-electron": "^2.3.6",
+    "copyfiles": "^2.4.1",
     "eslint": "^8.52.0",
     "glob": "^10.3.10",
+    "rimraf": "^5.0.5",
     "typescript": "^5.2.2"
   },
   "dependencies": {

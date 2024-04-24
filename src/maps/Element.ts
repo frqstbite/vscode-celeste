@@ -1,5 +1,5 @@
-import BinaryBuffer from "../serialization/BinaryBuffer";
-import StringLookup from "../serialization/StringLookup";
+import BinaryBuffer from "./serialization/BinaryBuffer.js";
+import StringLookup from "./serialization/StringLookup.js";
 
 export enum AttributeEncoding {
     Boolean,
