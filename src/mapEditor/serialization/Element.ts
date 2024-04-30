@@ -1,5 +1,9 @@
-import BinaryBuffer from "./serialization/BinaryBuffer.js";
-import StringLookup from "./serialization/StringLookup.js";
+import * as vscode from 'vscode';
+import { v1 } from 'uuid';
+
+import BinaryBuffer from "./BinaryBuffer";
+import StringLookup from "./StringLookup";
+import CelesteMapDocument from '../CelesteMapDocument';
 
 export enum AttributeEncoding {
     Boolean,
@@ -17,58 +21,60 @@ export enum AttributeEncoding {
 type Attribute = [AttributeEncoding, any];
 
 export default class Element {
+    public id: string;
     private _attributes: Map<string, Attribute> = new Map();
-    private _parent?: Element;
+    private _parent?: string;
     protected _children: Set<Element> = new Set();
 
-    static deserialize(buffer: BinaryBuffer, lookup: StringLookup, parent?: Element): Element {
-        const element = new Element(lookup.getString(buffer.readShort()), parent);
+    static fromBinary(document: CelesteMapDocument, in: BinaryBuffer, lookup: StringLookup, parent?: Element, ): [Map<string, Element>, string] {
+        const type = lookup.getString(in.readShort())
+        const element = new Element(type, parent);
 
         // Attributes
-        const attributeCount = buffer.readByte();
+        const attributeCount = in.readByte();
         for (let i = 0; i < attributeCount; i++) {
-            const name = lookup.getString(buffer.readShort());
-            const encoding = buffer.readByte();
+            const name = lookup.getString(in.readShort());
+            const encoding = in.readByte();
             let value;
             switch (encoding) {
                 case AttributeEncoding.Boolean:
-                    value = buffer.readBoolean();
+                    value = in.readBoolean();
                     break;
                 case AttributeEncoding.Byte:
-                    value = buffer.readByte();
+                    value = in.readByte();
                     break;
                 case AttributeEncoding.Short:
-                    value = buffer.readShort();
+                    value = in.readShort();
                     break;
                 case AttributeEncoding.Int:
-                    value = buffer.readLong();
+                    value = in.readLong();
                     break;
                 case AttributeEncoding.Float:
-                    value = buffer.readFloat();
+                    value = in.readFloat();
                     break;
                 case AttributeEncoding.LookupIndex:
-                    value = buffer.readShort();
+                    value = in.readShort();
                     break;
                 case AttributeEncoding.String:
-                    value = buffer.readString();
+                    value = in.readString();
                     break;
                 case AttributeEncoding.LengthEncodedString:
-                    value = buffer.readLengthEncodedString();
+                    value = in.readLengthEncodedString();
                     break;
                 case AttributeEncoding.Long:
-                    value = buffer.readLong();
+                    value = in.readLong();
                     break;
                 case AttributeEncoding.Double: //i dont think this is used
                     //value = buffer.readDouble();
                     break;
             }
-            element.setAttribute(name, encoding, value);
+            element.setAttribute(name, value, encoding as AttributeEncoding);
         }
 
         // Children
-        const childCount = buffer.readShort();
+        const childCount = in.readShort();
         for (let i = 0; i < childCount; i++) {
-            Element.deserialize(buffer, lookup, element);
+            Element.fromBinary(in, lookup, element);
         }
 
         return element;
@@ -77,9 +83,25 @@ export default class Element {
     constructor(
         public readonly type: string,
         public readonly parent?: Element
-    ) {}
+    ) {
+        this.id = v1();
+    }
 
-    setAttribute(name: string, encoding: AttributeEncoding, value: any) {
+    parentTo(parent: Element) {
+        this._parent = parent;
+        parent._children.add(this);
+    }
+
+    setAttribute(name: string, value: any, encoding?: AttributeEncoding) {
+        //vscode.window.showInformationMessage(`[${this.type}] ${name}: ${value} (${AttributeEncoding[encoding as number]})`);
+        if (encoding === undefined) {
+            if (this._attributes.has(name)) {
+                encoding = this._attributes.get(name)![0];
+            } else {
+                throw new Error(`Attribute ${name} does not exist on element ${this.type}`);
+            }
+        }
+
         this._attributes.set(name, [encoding, value]);
     }
 
@@ -110,6 +132,11 @@ export default class Element {
         return undefined;
     }
 
+    /**
+     * Return all children of this element
+     * @param type - If specified, only return children of this type
+     * @returns 
+     */
     children(type?: string): Element[] {
         const children: Element[] = [];
         for (const child of this._children) {
@@ -120,7 +147,7 @@ export default class Element {
         return children;
     }
 
-    serialize(buffer: BinaryBuffer, lookup: StringLookup) {
+    toBinary(buffer: BinaryBuffer, lookup: StringLookup) {
         buffer.writeShort(lookup.getLookupIndex(this.type));
 
         // Attributes
@@ -165,7 +192,25 @@ export default class Element {
         // Children
         buffer.writeShort(this._children.size);
         for (const child of this._children) {
-            child.serialize(buffer, lookup);
+            child.toBinary(buffer, lookup);
         }
+    }
+
+    toJson(): any {
+        const json: any = { type: this.type };
+
+        // Attributes
+        json.attributes = {};
+        for (const [name, [encoding, value]] of this._attributes.entries()) {
+            json.attributes[name] = value;
+        }
+
+        // Children
+        json.children = [];
+        for (const child of this._children) {
+            json.children.push(child.toJson());
+        }
+
+        return json; 
     }
 }

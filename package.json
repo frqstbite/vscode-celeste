@@ -2,6 +2,7 @@
   "name": "celeste",
   "displayName": "Celeste",
   "description": "Must-have extension for Celeste modders working with Everest.",
+  "icon": "assets/images/strawberry.png",
   "version": "0.0.1",
   "publisher": "frqstbite",
   "engines": {
@@ -13,12 +14,12 @@
   "activationEvents": [
     "onStartupFinished"
   ],
-  "main": "./out/extension.js",
+  "main": "out/extension.cjs",
   "contributes": {
     "customEditors": [
       {
-        "viewType": "celeste.mapEditor",
-        "displayName": "Map Editor",
+        "viewType": "celeste.mapViewport",
+        "displayName": "Celeste Map Editor",
         "selector": [
           {
             "filenamePattern": "**/Maps/**/*.bin"
@@ -29,11 +30,26 @@
     "jsonValidation": [
       {
         "fileMatch": "**/everest.json",
-        "url": "./src/schemas/everest.json"
+        "url": "./assets/schemas/yaml/everest.json"
       },
       {
         "fileMatch": "**/Maps/**/*.meta.json",
-        "url": "./src/schemas/map.meta.json"
+        "url": "./assets/schemas/yaml/map.meta.json"
+      }
+    ],
+    "languages": [
+      {
+        "id": "celestemap",
+        "icon": {
+          "light": "assets/images/strawberry.png",
+          "dark": "assets/images/strawberry.png"
+        },
+        "extensions": [
+          ".bin"
+        ],
+        "filenamePatterns": [
+          "**/Maps/**/*.bin"
+        ]
       }
     ],
     "viewsContainers": {
@@ -41,45 +57,87 @@
         {
           "id": "celeste",
           "title": "Celeste",
-          "icon": "assets/everest.png"
+          "icon": "assets/images/strawberry-outline.png"
         }
       ]
     },
     "views": {
       "celeste": [
         {
-          "id": "celeste.attributeEditor",
-          "name": "Attribute Editor",
-          "icon": "assets/everest.png"
-        },
-        {
           "id": "celeste.mapGraph",
           "name": "Map Graph",
-          "icon": "assets/everest.png"
+          "type": "tree",
+          "when": "activeWebviewPanelId == celeste.mapViewport"
+        },
+        {
+          "id": "celeste.attributeEditor",
+          "name": "Attribute Editor",
+          "type": "webview",
+          "when": "activeWebviewPanelId == celeste.mapViewport"
         }
       ]
-    }
+    },
+    "walkthroughs": [
+      {
+        "id": "celeste.setup",
+        "title": "Celeste",
+        "description": "Celeste modding tools",
+        "steps": [
+          {
+            "id": "celeste.install.celeste",
+            "title": "Download Celeste",
+            "description": "Download Celeste to start modding\n[Download Celeste](command:)",
+          },
+          {
+            "id": "celeste.install.everest",
+            "title": "Install Everest",
+            "description": "Install Everest to get started modding Celeste\n[Install Everest](https://everestapi.github.io/#installing-everest)",
+          },
+          {
+            "id": "celeste.schemas",
+            "title": "Install Everest",
+            "description": "Install Everest to get started modding Celeste\n[Install Everest](https://everestapi.github.io/#installing-everest)",
+          },
+          {
+            "id": "celeste.createMap",
+            "title": "Create a new map",
+            "description": "Create a new map for Celeste\n[Create Map](command:)",
+            "command": "celeste.createMap"
+          }
+        ]
+      },
+      {
+        "id": "celeste.firstmod",
+        "title": "First Mod",
+        "description": "Create your first Celeste mod with Everest.",
+      }
+    ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run package",
     "clean": "rimraf out/",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{json,xml,xsd,yaml,yml}\" out/",
-    "compile": "npm run clean && tsc -p ./ && npm run copyfiles",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint"
+    "compile": "npm run clean && npm run copyfiles && node ./esbuild.mjs --esm",
+    "copyfiles": "copyfiles -f \"src/webviews/**/*.css\" assets/css/",
+    "package": "NODE_ENV=production npm run compile",
+    "watch": "node ./esbuild.mjs --watch --esm"
   },
   "devDependencies": {
     "@types/node": "18.x",
+    "@types/uuid": "^9.0.8",
     "@types/vscode": "^1.84.0",
+    "@types/vscode-webview": "^1.57.5",
     "@vscode/test-electron": "^2.3.6",
     "copyfiles": "^2.4.1",
+    "esbuild": "^0.16.17",
     "eslint": "^8.52.0",
     "glob": "^10.3.10",
     "rimraf": "^5.0.5",
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@vscode/webview-ui-toolkit": "^1.4.0",
     "path": "^0.12.7",
-    "steam-path": "^1.0.2"
+    "steam-path": "^1.0.2",
+    "uuid": "^9.0.1"
   }
 }
