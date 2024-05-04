@@ -16,13 +16,13 @@ export async function activate(context: vscode.ExtensionContext) {
 	}*/
 
 	// Set up map viewport
-	//context.subscriptions.push(MapEditorProvider.register(context));
+	context.subscriptions.push(MapEditorProvider.register(context));
 
 	// Set up map graph
-	//context.subscriptions.push(MapGraphProvider.register(context));
+	context.subscriptions.push(MapGraphProvider.register(context));
 
 	// Set up attribute editor
-	//context.subscriptions.push(AttributeEditorProvider.register(context));
+	context.subscriptions.push(AttributeEditorProvider.register(context));
 	
 	registerSchemas(context);
 }

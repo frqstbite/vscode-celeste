@@ -3,106 +3,64 @@ import { v1 } from 'uuid';
 
 import BinaryBuffer from "./BinaryBuffer";
 import StringLookup from "./StringLookup";
+import ElementTree from './ElementTree';
 import CelesteMapDocument from '../CelesteMapDocument';
-
-export enum AttributeEncoding {
-    Boolean,
-    Byte,
-    Short,
-    Int,
-    Float,
-    LookupIndex,
-    String,
-    LengthEncodedString,
-    Long,
-    Double,
-}
+import { AttributeEncoding } from './AttributeEncoding';
 
 type Attribute = [AttributeEncoding, any];
 
 export default class Element {
-    public id: string;
     private _attributes: Map<string, Attribute> = new Map();
-    private _parent?: string;
-    protected _children: Set<Element> = new Set();
+    private _parent?: Element;
+    private _children: Set<Element> = new Set();
+    
+    public readonly type: string;
 
-    static fromBinary(document: CelesteMapDocument, in: BinaryBuffer, lookup: StringLookup, parent?: Element, ): [Map<string, Element>, string] {
-        const type = lookup.getString(in.readShort())
+    static fromBinary(buffer: BinaryBuffer, lookup: StringLookup, parent?: Element): Element {
+        const s = buffer.readShort()
+        const type = lookup.getString(s);
         const element = new Element(type, parent);
 
         // Attributes
-        const attributeCount = in.readByte();
+        const attributeCount = buffer.readByte();
         for (let i = 0; i < attributeCount; i++) {
-            const name = lookup.getString(in.readShort());
-            const encoding = in.readByte();
-            let value;
-            switch (encoding) {
-                case AttributeEncoding.Boolean:
-                    value = in.readBoolean();
-                    break;
-                case AttributeEncoding.Byte:
-                    value = in.readByte();
-                    break;
-                case AttributeEncoding.Short:
-                    value = in.readShort();
-                    break;
-                case AttributeEncoding.Int:
-                    value = in.readLong();
-                    break;
-                case AttributeEncoding.Float:
-                    value = in.readFloat();
-                    break;
-                case AttributeEncoding.LookupIndex:
-                    value = in.readShort();
-                    break;
-                case AttributeEncoding.String:
-                    value = in.readString();
-                    break;
-                case AttributeEncoding.LengthEncodedString:
-                    value = in.readLengthEncodedString();
-                    break;
-                case AttributeEncoding.Long:
-                    value = in.readLong();
-                    break;
-                case AttributeEncoding.Double: //i dont think this is used
-                    //value = buffer.readDouble();
-                    break;
-            }
-            element.setAttribute(name, value, encoding as AttributeEncoding);
+            const name = lookup.getString(buffer.readShort());
+            const [ encoding, value ] = buffer.readEncodedValue();
+            element.setAttribute(name, value, encoding);
         }
 
         // Children
-        const childCount = in.readShort();
+        const childCount = buffer.readShort();
         for (let i = 0; i < childCount; i++) {
-            Element.fromBinary(in, lookup, element);
+            Element.fromBinary(buffer, lookup, element);
         }
 
         return element;
     }
 
-    constructor(
-        public readonly type: string,
-        public readonly parent?: Element
-    ) {
-        this.id = v1();
-    }
-
-    parentTo(parent: Element) {
-        this._parent = parent;
-        parent._children.add(this);
-    }
-
-    setAttribute(name: string, value: any, encoding?: AttributeEncoding) {
-        //vscode.window.showInformationMessage(`[${this.type}] ${name}: ${value} (${AttributeEncoding[encoding as number]})`);
-        if (encoding === undefined) {
-            if (this._attributes.has(name)) {
-                encoding = this._attributes.get(name)![0];
-            } else {
-                throw new Error(`Attribute ${name} does not exist on element ${this.type}`);
-            }
+    constructor(type: string, parent?: Element) {
+        this.type = type;
+        if (parent) {
+            this.setParent(parent);
         }
+    }
 
-        this._attributes.set(name, [encoding, value]);
+    /**
+     * Delete this element from the hierarchy.
+     */
+    delete() {
+        this._parent?.removeChild(this);
+        this._parent = undefined;
+    }
+
+    getParent(): Element | undefined {
+        return this._parent;
+    }
+
+    setParent(parent: Element) {
+        this._parent?.removeChild(this);
+        this._parent = parent;
+        parent.addChild(this);
     }
 
     getAttribute(name: string): any | undefined {
@@ -110,20 +68,52 @@ export default class Element {
         return attr ? attr[1] : undefined;
     }
 
-    /**
-     * Delete this element from the hierarchy.
-     */
-    delete() {
-        this._parent?._children.delete(this);
-        this._parent = undefined;
+    setAttribute(name: string, value: any, encoding?: AttributeEncoding) {
+        //vscode.window.showInformationMessage(`[${this.type}] ${name}: ${value} (${AttributeEncoding[encoding as number]})`);
+        if (encoding === undefined) {
+
+            // No encoding specified. Does this attribute already exist?
+            if (this._attributes.has(name)) {
+                encoding = this._attributes.get(name)![0]; //Get the encoding from the existing attribute
+
+            // TODO: else if element schema has this attribute, get encoding from schema 
+
+            } else {
+                throw new Error(`Attribute ${name} does not exist on element ${this.type}`); //Throw
+            }
+        }
+
+        this._attributes.set(name, [encoding, value]);
+    }
+
+    getAttributes(): Map<string, Attribute> {
+        return this._attributes;
     }
 
     /**
-     * Return a child element of the specified type
-     * @param type 
+     * Add a child element to this element.
+     * @param element 
      * @returns 
      */
-    child(type: string): Element | undefined {
+    addChild(element: Element): Element {
+        this._children.add(element);
+        return element;
+    }
+
+    /**
+     * Remove a child `Element` from this `Element`.
+     * @param element The child to remove.
+     */
+    removeChild(element: Element) {
+        this._children.delete(element);
+    }
+
+    /**
+     * Return a child `Element` of the specified type.
+     * @param type The type of the child to return.
+     * @returns 
+     */
+    getChild(type: string): Element | undefined {
         for (const child of this._children) {
             if (child.type === type) {
                 return child;
@@ -137,7 +127,7 @@ export default class Element {
      * @param type - If specified, only return children of this type
      * @returns 
      */
-    children(type?: string): Element[] {
+    getChildren(type?: string): Element[] {
         const children: Element[] = [];
         for (const child of this._children) {
             if (!type || child.type === type) {
@@ -154,39 +144,7 @@ export default class Element {
         buffer.writeByte(this._attributes.size);
         for (const [name, [encoding, value]] of this._attributes.entries()) {
             buffer.writeShort(lookup.getLookupIndex(name));
-            buffer.writeByte(encoding);
-            switch (encoding) {
-                case AttributeEncoding.Boolean:
-                    buffer.writeBoolean(value);
-                    break;
-                case AttributeEncoding.Byte:
-                    buffer.writeByte(value);
-                    break;
-                case AttributeEncoding.Short:
-                    buffer.writeShort(value);
-                    break;
-                case AttributeEncoding.Int:
-                    buffer.writeLong(value);
-                    break;
-                case AttributeEncoding.Float:
-                    buffer.writeFloat(value);
-                    break;
-                case AttributeEncoding.LookupIndex:
-                    buffer.writeShort(value);
-                    break;
-                case AttributeEncoding.String:
-                    buffer.writeString(value);
-                    break;
-                case AttributeEncoding.LengthEncodedString:
-                    buffer.writeLengthEncodedString(value);
-                    break;
-                case AttributeEncoding.Long:
-                    buffer.writeLong(value);
-                    break;
-                case AttributeEncoding.Double: //i dont think this is used
-                    //buffer.writeDouble(value);
-                    break;
-            }
+            buffer.writeEncodedValue(encoding, value);
         }
 
         // Children
@@ -194,23 +152,5 @@ export default class Element {
         for (const child of this._children) {
             child.toBinary(buffer, lookup);
         }
-    }
-
-    toJson(): any {
-        const json: any = { type: this.type };
-
-        // Attributes
-        json.attributes = {};
-        for (const [name, [encoding, value]] of this._attributes.entries()) {
-            json.attributes[name] = value;
-        }
-
-        // Children
-        json.children = [];
-        for (const child of this._children) {
-            json.children.push(child.toJson());
-        }
-
-        return json; 
     }
 }

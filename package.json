@@ -85,18 +85,19 @@
         "steps": [
           {
             "id": "celeste.install.celeste",
-            "title": "Download Celeste",
-            "description": "Download Celeste to start modding\n[Download Celeste](command:)",
+            "title": "Where is Celeste?",
+            "description": "We try our best to automatically detect Celeste's installation path. You can adjust it in settings at any time.\n[Settings](command:workbench.action.openSettings?query=celeste.steamPath)"
+            
           },
           {
             "id": "celeste.install.everest",
             "title": "Install Everest",
-            "description": "Install Everest to get started modding Celeste\n[Install Everest](https://everestapi.github.io/#installing-everest)",
+            "description": "Install Everest to get started modding Celeste\n[Install Everest](https://everestapi.github.io/#installing-everest)"
           },
           {
             "id": "celeste.schemas",
             "title": "Install Everest",
-            "description": "Install Everest to get started modding Celeste\n[Install Everest](https://everestapi.github.io/#installing-everest)",
+            "description": "Install Everest to get started modding Celeste\n[Install Everest](https://everestapi.github.io/#installing-everest)"
           },
           {
             "id": "celeste.createMap",
@@ -109,7 +110,7 @@
       {
         "id": "celeste.firstmod",
         "title": "First Mod",
-        "description": "Create your first Celeste mod with Everest.",
+        "description": "Create your first Celeste mod with Everest."
       }
     ]
   },

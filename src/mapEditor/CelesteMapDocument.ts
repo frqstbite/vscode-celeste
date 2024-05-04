@@ -5,6 +5,7 @@ import { Disposable } from '../utility/Disposable';
 import Element from './serialization/Element';
 import BinaryBuffer from './serialization/BinaryBuffer';
 import StringLookup from './serialization/StringLookup';
+import ElementTree from './serialization/ElementTree';
 
 
 /**
@@ -12,18 +13,18 @@ import StringLookup from './serialization/StringLookup';
  * Handles serialization and edit tracking.
  */
 export default class CelesteMapDocument extends Disposable implements vscode.CustomDocument {
-	public static readonly header = "CELESTE MAP";
+	private static readonly header = "CELESTE MAP";
 
     public readonly uri: vscode.Uri;
-	public elements: Map<string, Element>;
     
 	private readonly _root: string;
 	public get root() { return this.getElement(this._root) }
-
+	
+	private _elements: ElementTree;
 	private _edits: vscode.CustomDocumentEditEvent<CelesteMapDocument>[] = [];
 	private _savedEdits: vscode.CustomDocumentEditEvent<CelesteMapDocument>[] = [];
 
-    private readonly _onDidChangeContent = new vscode.EventEmitter<vscode.CustomDocumentEditEvent<CelesteMapDocument>>();
+    private readonly _onDidChangeContent = this._register(new vscode.EventEmitter<vscode.CustomDocumentEditEvent<CelesteMapDocument>>());
 	/**
 	 * Fired when the document is modified.
 	 */
@@ -50,14 +51,20 @@ export default class CelesteMapDocument extends Disposable implements vscode.Cus
 		buffer.readString(); //Package name
 
         const lookup = StringLookup.deserialize(buffer);
-		[ this.elements, this._root ] = Element.fromBinary(buffer, lookup);
+		this._elements = ElementTree.fromBinary(buffer, lookup);
+		this._root = this._elements.root;
     }
 
 	getElement(id: string): Element | undefined {
-		return this.elements.get(id);
+		return this._elements.getElement(id);
 	}
 
-	insertElement(parent: Element, element: Element): void {
+	insertElement(parentId: string, id: string): void {
+		const parent = this.getElement(parentId);
+		if (!parent) throw new Error(`Element with id ${parentId} not found`);
+		const element = this.getElement(id);
+		if (!element) throw new Error(`Element with id ${id} not found`);
+
 		const edit = {
 			document: this,
 			label: 'Insert Element',
@@ -67,14 +74,17 @@ export default class CelesteMapDocument extends Disposable implements vscode.Cus
 			},
 			redo: () => {
 				this._edits.push(edit);
-				element.parentTo(parent);
+				element.setParent(parent);
 			}
 		};
 		edit.redo();
 		this._onDidChangeContent.fire(edit);
 	}
 	
-	changeElement(element: Element, changes: { [key: string]: any }): void {
+	changeElement(id: string, changes: { [key: string]: any }): void {
+		const element = this.getElement(id);
+		if (!element) throw new Error(`Element with id ${id} not found`);
+
 		const oldValues: { [key: string]: any } = {};
 		const newValues: { [key: string]: any } = {};
 		for (const key in changes) {
@@ -102,18 +112,19 @@ export default class CelesteMapDocument extends Disposable implements vscode.Cus
 		this._onDidChangeContent.fire(edit);
 	}
 
-	removeElement(element: Element): void {
-		const parent = element.parent;
-		if (!parent) {
-			throw new Error('Cannot remove the root element');
-		}
+	removeElement(id: string): void {
+		const element = this.getElement(id);
+		if (!element) throw new Error(`Element with id ${id} not found`);
+
+		const parent = element.getParent();
+		if (!parent) throw new Error('Cannot remove the root element');
 
 		const edit = {
 			document: this,
 			label: 'Remove Element',
 			undo: () => {
 				this._edits.pop();
-				element.parentTo(parent!);
+				element.setParent(parent!);
 			},
 			redo: () => {
 				this._edits.push(edit);
@@ -135,7 +146,7 @@ export default class CelesteMapDocument extends Disposable implements vscode.Cus
 		const buffer = new BinaryBuffer();
 		buffer.writeString(CelesteMapDocument.header);
 		buffer.writeString(path.basename(target.path, path.extname(target.path))); //Package name
-        this.getElement(this.root).toBinary(buffer, lookup);
+        this.root?.toBinary(buffer, lookup);
 
 		if (cancellation.isCancellationRequested) {
 			return;

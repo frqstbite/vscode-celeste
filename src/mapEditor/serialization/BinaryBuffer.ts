@@ -1,25 +1,27 @@
+import { AttributeEncoding } from "./AttributeEncoding";
+
 const floor = Math.floor; // for performance
 
 function frexp(value: number) {
     if (value === 0) {
         return [value, 0];
     }
-    var data = new DataView(new ArrayBuffer(8));
+    let data = new DataView(new ArrayBuffer(8));
     data.setFloat64(0, value);
-    var bits = (data.getUint32(0) >>> 20) & 0x7FF;
+    let bits = (data.getUint32(0) >>> 20) & 0x7FF;
     if (bits === 0) { // denormal
         data.setFloat64(0, value * Math.pow(2, 64));  // exp + 64
         bits = ((data.getUint32(0) >>> 20) & 0x7FF) - 64;
     }
-    var exponent = bits - 1022;
-    var mantissa = ldexp(value, -exponent);
+    let exponent = bits - 1022;
+    let mantissa = ldexp(value, -exponent);
     return [mantissa, exponent];
 }
 
 function ldexp(mantissa: number, exponent: number) {
-    var steps = Math.min(3, Math.ceil(Math.abs(exponent) / 1023));
-    var result = mantissa;
-    for (var i = 0; i < steps; i++) {
+    let steps = Math.min(3, Math.ceil(Math.abs(exponent) / 1023));
+    let result = mantissa;
+    for (let i = 0; i < steps; i++) {
         result *= Math.pow(2, floor((exponent + i) / steps));
     }
     return result;
@@ -34,11 +36,11 @@ function twosCompliment(n: number, power: number) {
 }
 
 function readVariableLength(buffer: BinaryBuffer) {
-    var res = 0;
-    var multiplier = 1;
+    /*let res = 0;
+    let multiplier = 1;
 
     while (true) {
-        var byte = buffer.readByte();
+        let byte = buffer.readByte();
 
         if (byte < 128) {
             return res + byte * multiplier;
@@ -47,7 +49,23 @@ function readVariableLength(buffer: BinaryBuffer) {
         }
 
         multiplier *= 128;
-    }
+    }*/
+
+    var num1 = 0;
+    var num2 = 0;
+    var b;
+    
+    do {
+        if (num2 == 35) {
+            throw new RangeError("Bad 7-bit integer");
+        }
+        b = buffer.readByte();
+        num1 |= (b & 0x7F) << num2;
+        num2 += 7;
+    } while ((b & 0x80) != 0);
+    
+    // At this point, num1 equals the result integer
+    return num1;
 }
 
 function writeVariableLength(buffer: BinaryBuffer, length: number) {
@@ -130,8 +148,9 @@ export default class BinaryBuffer {
     }
 
     readLengthEncodedString(): string {
-        var string = "";
-        for (var i = 0; i < this.readShort(); i += 2) {
+        let string = "";
+        const length = this.readShort();
+        for (let i = 0; i < length; i += 2) {
             const repeat = this.readByte();
             const char = this.readByte();
             string += String.fromCharCode(char).repeat(repeat);
@@ -141,11 +160,11 @@ export default class BinaryBuffer {
 
     // might be slow
     writeLengthEncodedString(value: string) {
-        var condensed = [];
-        var lastChar = "";
-        var repeat = 0;
-        for (var i = 0; i < value.length; i++) {
-            var char = value.charAt(i);
+        let condensed = [];
+        let lastChar = "";
+        let repeat = 0;
+        for (let i = 0; i < value.length; i++) {
+            let char = value.charAt(i);
             if (char === lastChar) {
                 repeat++;
             } else {
@@ -159,7 +178,7 @@ export default class BinaryBuffer {
         }
 
         this.writeShort(condensed.length);
-        for (var i = 0; i < condensed.length; i += 2) {
+        for (let i = 0; i < condensed.length; i += 2) {
             this.writeBytes(
                 condensed[i] as number,
                 (condensed[i + 1] as string).charCodeAt(0),
@@ -178,15 +197,15 @@ export default class BinaryBuffer {
     }
 
     readFloat(): number {
-        var [ b4, b3, b2, b1 ] = this.readBytes(4);
-        var exponent = (b1 % 128) * 2 + floor(b2 / 128);
+        let [ b4, b3, b2, b1 ] = this.readBytes(4);
+        let exponent = (b1 % 128) * 2 + floor(b2 / 128);
     
         if (exponent === 0) {
             return 0.0;
         }
     
-        var sign = (b1 > 127) ? -1 : 1;
-        var mantissa = ((b2 % 128) * 256 + b3) * 256 + b4;
+        let sign = (b1 > 127) ? -1 : 1;
+        let mantissa = ((b2 % 128) * 256 + b3) * 256 + b4;
     
         // Infinity/NaN check
         // Eight 1s in exponent is infinity/NaN
@@ -204,17 +223,17 @@ export default class BinaryBuffer {
     }
 
     writeFloat(n: number) {
-        var b1, b2, b3, b4;
+        let b1, b2, b3, b4;
     
-        var val = n;
-        var sign = 0;
+        let val = n;
+        let sign = 0;
     
         if (val < 0) {
             sign = 1;
             val = -val;
         }
     
-        var [ mantissa, exponent ] = frexp(val);
+        let [ mantissa, exponent ] = frexp(val);
     
         if (val === 0) {
             mantissa = 0;
@@ -245,5 +264,74 @@ export default class BinaryBuffer {
         b4 = floor(sign * 128 + val) % 256;
     
         this.writeBytes(b1, b2, b3, b4);
+    }
+
+    readEncodedValue(): [AttributeEncoding, any] {
+        const encoding = this.readByte();
+        // yucky switch statement
+        switch (encoding) {
+            case AttributeEncoding.Boolean:
+                return [encoding, this.readBoolean()];
+            case AttributeEncoding.Byte:
+                return [encoding, this.readByte()];
+            case AttributeEncoding.Short:
+                return [encoding, this.readShort()];
+            case AttributeEncoding.Int:
+                return [encoding, this.readLong()];
+            case AttributeEncoding.Float:
+                return [encoding, this.readFloat()];
+            case AttributeEncoding.LookupIndex:
+                return [encoding, this.readShort()];
+            case AttributeEncoding.String:
+                return [encoding, this.readString()];
+            case AttributeEncoding.LengthEncodedString:
+                return [encoding, this.readLengthEncodedString()];
+            case AttributeEncoding.Long:
+                return [encoding, this.readLong()];
+            case AttributeEncoding.Double:
+                return [encoding, this.readFloat()];
+            default:
+                throw new Error(`Unknown encoding on encoded value: ${encoding}`);
+        }
+
+    }
+
+    writeEncodedValue(encoding: AttributeEncoding, value: any) {
+        this.writeByte(encoding as number);
+        // yucky switch statement
+        switch (encoding) {
+            case AttributeEncoding.Boolean:
+                this.writeBoolean(value);
+                break;
+            case AttributeEncoding.Byte:
+                this.writeByte(value);
+                break;
+            case AttributeEncoding.Short:
+                this.writeShort(value);
+                break;
+            case AttributeEncoding.Int:
+                this.writeLong(value);
+                break;
+            case AttributeEncoding.Float:
+                this.writeFloat(value);
+                break;
+            case AttributeEncoding.LookupIndex:
+                this.writeShort(value);
+                break;
+            case AttributeEncoding.String:
+                this.writeString(value);
+                break;
+            case AttributeEncoding.LengthEncodedString:
+                this.writeLengthEncodedString(value);
+                break;
+            case AttributeEncoding.Long:
+                this.writeLong(value);
+                break;
+            case AttributeEncoding.Double:
+                this.writeFloat(value); //preeeeetty sure this is unused
+                break;
+            default:
+                throw new Error(`Attempt to write encoded value with unknown encoding: ${encoding}`);
+        }
     }
 }

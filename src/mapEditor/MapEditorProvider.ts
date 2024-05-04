@@ -7,6 +7,10 @@ import CelesteMapDocument from './CelesteMapDocument';
 export default class MapEditorProvider implements vscode.CustomEditorProvider<CelesteMapDocument> {
     public static readonly viewType = "celeste.mapViewport";
 
+    public static activeDocument: CelesteMapDocument | undefined;
+    private static readonly _onDidChangeActiveDocument = new vscode.EventEmitter<CelesteMapDocument | undefined>();
+    public static readonly onDidChangeActiveDocument = MapEditorProvider._onDidChangeActiveDocument.event;
+
     public static register(extension: vscode.ExtensionContext): vscode.Disposable {
         return vscode.window.registerCustomEditorProvider(
             MapEditorProvider.viewType,
@@ -20,23 +24,33 @@ export default class MapEditorProvider implements vscode.CustomEditorProvider<Ce
         );
     }
 
-    private readonly extension: vscode.ExtensionContext;
-    private readonly webviews = new WebviewCollection();
-
-    public activeDocument: CelesteMapDocument | undefined;
+    private readonly _extension: vscode.ExtensionContext;
+    private readonly _webviews = new WebviewCollection();
+    private readonly _documents = new Map<string, CelesteMapDocument>();
 
     private readonly _onDidChangeCustomDocument = new vscode.EventEmitter<vscode.CustomDocumentEditEvent<CelesteMapDocument>>();
 	public readonly onDidChangeCustomDocument = this._onDidChangeCustomDocument.event;
 
     constructor(extension: vscode.ExtensionContext) {
-        this.extension = extension;
-        
-        vscode.window.tabGroups.onDidChangeTabs((e) => {
-            const active = e.changed[0];
+        this._extension = extension;
 
-            if ((active.input as any)?.viewType === MapEditorProvider.viewType) {
-                vscode.window.showInformationMessage("Active document is a CelesteMapDocument");
+        // Update active document when tab changes
+        vscode.window.tabGroups.onDidChangeTabs((e) => {
+            const data = (e.changed[0] ?? e.opened).input as any;
+
+            if (data?.viewType === MapEditorProvider.viewType) {
+                // Active document is a CelesteMapDocument
+                const active = this._documents.get(data.uri.toString());
+                if (active !== MapEditorProvider.activeDocument) {
+                    MapEditorProvider.activeDocument = active;
+                } else {
+                    return; //No change
+                }
+            } else {
+                MapEditorProvider.activeDocument = undefined;
             }
+
+            MapEditorProvider._onDidChangeActiveDocument.fire(MapEditorProvider.activeDocument);
         });
     }
     
@@ -48,8 +62,14 @@ export default class MapEditorProvider implements vscode.CustomEditorProvider<Ce
 			throw new Error('Canceled'); //cant return null so i guess we're just gonna fuckin throw?? god forbid i want to cancel this operation
 		}
 
-        const update = map.onDidChangeContent((e) => this._onDidChangeCustomDocument.fire(e)); //Forward content changes to VS Code
-        map.onDidDispose(() => update.dispose()); //Stop listening to content changes after the document is disposed
+        const upsig = map.onDidChangeContent((e) => this._onDidChangeCustomDocument.fire(e)); //Forward content changes to VS Code
+        const dsig = map.onDidDispose(() => {
+            upsig.dispose();
+            dsig.dispose();
+            this._documents.delete(uri.toString());
+        });
+
+        this._documents.set(uri.toString(), map);
         return map;
     }
 
@@ -71,13 +91,13 @@ export default class MapEditorProvider implements vscode.CustomEditorProvider<Ce
 
     resolveCustomEditor(document: CelesteMapDocument, panel: vscode.WebviewPanel, token: vscode.CancellationToken): void | Thenable<void> {
         // Begin tracking this webview
-        this.webviews.add(document.uri, panel);
+        this._webviews.add(document.uri, panel);
         
         panel.webview.options = {
             enableScripts: true,
             localResourceRoots: [
-                vscode.Uri.joinPath(this.extension.extensionUri, 'out'),
-                vscode.Uri.joinPath(this.extension.extensionUri, 'assets')
+                vscode.Uri.joinPath(this._extension.extensionUri, 'out'),
+                vscode.Uri.joinPath(this._extension.extensionUri, 'assets')
             ]
         };
         
@@ -106,6 +126,6 @@ export default class MapEditorProvider implements vscode.CustomEditorProvider<Ce
     }
 
     private _webviewUrl(webview: vscode.Webview, path: string[]) {
-        return webview.asWebviewUri(vscode.Uri.joinPath(this.extension.extensionUri, ...path));
+        return webview.asWebviewUri(vscode.Uri.joinPath(this._extension.extensionUri, ...path));
     }
 }
