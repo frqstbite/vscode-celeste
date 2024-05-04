@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { v1 } from 'uuid';
 
-import WebviewCollection from '../utility/WebviewCollection';
+import DocumentCollection from '../utility/DocumentCollection';
 import CelesteMapDocument from './CelesteMapDocument';
 import Element from './serialization/Element';
 

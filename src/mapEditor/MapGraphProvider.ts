@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
-import WebviewCollection from '../utility/WebviewCollection.js';
+import DocumentCollection from '../utility/DocumentCollection.js';
 import CelesteMapDocument from './CelesteMapDocument.js';
 import Element from './serialization/Element.js';
 import MapEditorProvider from './MapEditorProvider.js';
+import path from 'path';
 
 const VIEW_ID = "celeste.mapGraph";
 
@@ -33,7 +34,7 @@ export default class MapGraphProvider implements vscode.TreeDataProvider<Element
     public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
     constructor() {
-        MapEditorProvider.onDidChangeActiveDocument(() => {
+        MapEditorProvider.onDidChangeActiveDocument((document) => {
             this._onDidChangeTreeData.fire();
         });
     }
@@ -52,7 +53,6 @@ export default class MapGraphProvider implements vscode.TreeDataProvider<Element
         } else {
             const document = MapEditorProvider.activeDocument;
             if (document) {
-                vscode.window.showInformationMessage("Document is active, atttempting to mount tree structure");
                 children.push(new ElementItem(document.root!, vscode.TreeItemCollapsibleState.Collapsed));
             }
         }

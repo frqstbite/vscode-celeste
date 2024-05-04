@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { v1 } from 'uuid';
 
-import WebviewCollection from '../utility/WebviewCollection';
+import DocumentCollection from '../utility/DocumentCollection';
 import CelesteMapDocument from './CelesteMapDocument';
 
 export default class MapEditorProvider implements vscode.CustomEditorProvider<CelesteMapDocument> {
@@ -25,8 +25,7 @@ export default class MapEditorProvider implements vscode.CustomEditorProvider<Ce
     }
 
     private readonly _extension: vscode.ExtensionContext;
-    private readonly _webviews = new WebviewCollection();
-    private readonly _documents = new Map<string, CelesteMapDocument>();
+    private readonly _documents = new DocumentCollection<CelesteMapDocument>();
 
     private readonly _onDidChangeCustomDocument = new vscode.EventEmitter<vscode.CustomDocumentEditEvent<CelesteMapDocument>>();
 	public readonly onDidChangeCustomDocument = this._onDidChangeCustomDocument.event;
@@ -35,23 +34,27 @@ export default class MapEditorProvider implements vscode.CustomEditorProvider<Ce
         this._extension = extension;
 
         // Update active document when tab changes
-        vscode.window.tabGroups.onDidChangeTabs((e) => {
-            const data = (e.changed[0] ?? e.opened).input as any;
+        this._updateActiveDocument();
+        vscode.window.tabGroups.onDidChangeTabs( (_) => this._updateActiveDocument() );
+    }
 
-            if (data?.viewType === MapEditorProvider.viewType) {
-                // Active document is a CelesteMapDocument
-                const active = this._documents.get(data.uri.toString());
-                if (active !== MapEditorProvider.activeDocument) {
-                    MapEditorProvider.activeDocument = active;
-                } else {
-                    return; //No change
-                }
+    private _updateActiveDocument() {
+        const tab = vscode.window.tabGroups.activeTabGroup.activeTab;
+        const data = tab?.input as any;
+
+        if (data?.viewType === MapEditorProvider.viewType) {
+            // Active document is a CelesteMapDocument
+            const active = this._documents.get(data.uri);
+            if (active !== MapEditorProvider.activeDocument) {
+                MapEditorProvider.activeDocument = active;
             } else {
-                MapEditorProvider.activeDocument = undefined;
+                return; //No change
             }
+        } else {
+            MapEditorProvider.activeDocument = undefined;
+        }
 
-            MapEditorProvider._onDidChangeActiveDocument.fire(MapEditorProvider.activeDocument);
-        });
+        MapEditorProvider._onDidChangeActiveDocument.fire(MapEditorProvider.activeDocument);
     }
     
     async openCustomDocument(uri: vscode.Uri, openContext: vscode.CustomDocumentOpenContext, token: vscode.CancellationToken): Promise<CelesteMapDocument> {
@@ -66,10 +69,8 @@ export default class MapEditorProvider implements vscode.CustomEditorProvider<Ce
         const dsig = map.onDidDispose(() => {
             upsig.dispose();
             dsig.dispose();
-            this._documents.delete(uri.toString());
         });
 
-        this._documents.set(uri.toString(), map);
         return map;
     }
 
@@ -90,8 +91,10 @@ export default class MapEditorProvider implements vscode.CustomEditorProvider<Ce
     }
 
     resolveCustomEditor(document: CelesteMapDocument, panel: vscode.WebviewPanel, token: vscode.CancellationToken): void | Thenable<void> {
-        // Begin tracking this webview
-        this._webviews.add(document.uri, panel);
+        // Begin tracking this document
+        this._documents.add(document.uri, document);
+        this._documents.addWebview(document.uri, panel);
+        this._updateActiveDocument();
         
         panel.webview.options = {
             enableScripts: true,
