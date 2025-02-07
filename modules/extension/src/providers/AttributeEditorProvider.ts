@@ -2,11 +2,11 @@ import * as vscode from 'vscode';
 import { v1 } from 'uuid';
 
 import DocumentCollection from '../utility/DocumentCollection';
-import CelesteMapDocument from './CelesteMapDocument';
-import Element from './serialization/Element';
+import CelesteMapDocument from '../CelesteMapDocument';
+import Element from '../../../common/src/Element';
 
 export default class AttributeEditorProvider implements vscode.WebviewViewProvider {
-    public static readonly viewId = "celeste.attributeEditor";
+    public static readonly viewId = 'celeste.attributeEditor';
 
     public static register(context: vscode.ExtensionContext): vscode.Disposable {
         return vscode.window.registerWebviewViewProvider(
@@ -40,24 +40,16 @@ export default class AttributeEditorProvider implements vscode.WebviewViewProvid
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extension.extensionUri, 'out', 'attributeEditor.js'));
 
         return `<!DOCTYPE html>
-        <html lang="en">
+        <html lang='en'>
         <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-            <!--
-                Use a content security policy to only allow loading styles from our extension directory,
-                and only allow scripts that have a specific nonce.
-                (See the 'webview-sample' extension sample for img-src content security policy examples)
-            -->
-            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; font-src ${webview.cspSource}; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';">
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <meta http-equiv='Content-Security-Policy' content='default-src 'none'; style-src ${webview.cspSource}; font-src ${webview.cspSource}; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';'>
             <title>Attribute Editor</title>
         </head>
         <body>
-
-            <vscode-button id="add-color-button">Howdy!</vscode-button>
-
-            <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
+            <div id='app'></div>
+            <script type='module' nonce='${nonce}' src='${scriptUri}'></script>
         </body>
         </html>`;
     }

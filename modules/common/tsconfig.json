@@ -1,0 +1,9 @@
+{
+    "include": [
+        "src/**/*"
+    ],
+    "compilerOptions": {
+        "outFile": "out/index.js",
+        "declaration": true
+    }
+}

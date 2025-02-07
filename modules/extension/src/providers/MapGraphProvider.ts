@@ -1,11 +1,10 @@
 import * as vscode from 'vscode';
 import DocumentCollection from '../utility/DocumentCollection.js';
-import CelesteMapDocument from './CelesteMapDocument.js';
-import Element from './serialization/Element.js';
+import CelesteMapDocument from '../CelesteMapDocument.js';
+import Element from '../../../common/src/Element.js';
 import MapEditorProvider from './MapEditorProvider.js';
 import path from 'path';
 
-const VIEW_ID = "celeste.mapGraph";
 
 /**
  * TreeItem that wraps around an {@link ElementItem}
@@ -18,14 +17,17 @@ class ElementItem extends vscode.TreeItem {
         super(element.type, collapsibleState);
         
         this.tooltip = `this element is a ${element.type!}`;
-        this.description = "descriptipon";
+        this.description = element.getAttribute('name');
     }
 }
 
+
 export default class MapGraphProvider implements vscode.TreeDataProvider<ElementItem> {
+    private static readonly viewId = 'celeste.mapGraph';
+
     public static register(context: vscode.ExtensionContext): vscode.Disposable {
         return vscode.window.registerTreeDataProvider(
-            VIEW_ID,
+            MapGraphProvider.viewId,
             new MapGraphProvider()
         );
     }

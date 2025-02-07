@@ -1,24 +1,55 @@
 {
-  "name": "celeste",
-  "displayName": "Celeste",
-  "description": "Must-have extension for Celeste modders working with Everest.",
-  "icon": "assets/images/strawberry.png",
-  "version": "0.0.1",
-  "publisher": "frqstbite",
-  "engines": {
-    "vscode": "^1.84.0"
+  "name": "vscode-celeste",
+  "version": "0.1.0",
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "workspaces-run --parallel -- npm run compile",
+    "watch": "workspaces-run --parallel -- npm run watch",
+    "package": "workspaces-run --parallel -- npm run package"
   },
+  "devDependencies": {
+    "workspaces-run": "^1.0.0"
+  },
+  "main": "dist/extension.cjs",
+  "description": "Must-have extension for Celeste modders working with Everest.",
+  "author": "frqstbite",
+  "homepage": "https://github.com/frqstbite/vscode-celeste#readme",
+  "license": "MIT",
+  "keywords": [
+    "celeste",
+    "vscode",
+    "extension",
+    "editor",
+    "map",
+    "maps"
+  ],
+  "workspaces": [
+    "modules/*"
+  ],
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frqstbite/vscode-celeste.git"
+  },
+  "bugs": {
+    "url": "https://github.com/frqstbite/vscode-celeste/issues"
+  },
+
+  "displayName": "Celeste",
+  "publisher": "frqstbite",
+  "icon": "assets/images/strawberry.png",
   "categories": [
     "Other"
   ],
   "activationEvents": [
     "onStartupFinished"
   ],
-  "main": "out/extension.cjs",
   "contributes": {
     "customEditors": [
       {
-        "viewType": "celeste.mapViewport",
+        "viewType": "celeste.map-viewport",
         "displayName": "Celeste Map Editor",
         "selector": [
           {
@@ -64,16 +95,16 @@
     "views": {
       "celeste": [
         {
-          "id": "celeste.mapGraph",
+          "id": "celeste.map-graph",
           "name": "Map Graph",
           "type": "tree",
-          "when": "activeWebviewPanelId == celeste.mapViewport"
+          "when": "activeWebviewPanelId == celeste.map-viewport"
         },
         {
-          "id": "celeste.attributeEditor",
+          "id": "celeste.attribute-editor",
           "name": "Attribute Editor",
           "type": "webview",
-          "when": "activeWebviewPanelId == celeste.mapViewport"
+          "when": "activeWebviewPanelId == celeste.map-viewport"
         }
       ]
     },
@@ -87,7 +118,6 @@
             "id": "celeste.install.celeste",
             "title": "Where is Celeste?",
             "description": "We try our best to automatically detect Celeste's installation path. You can adjust it in settings at any time.\n[Settings](command:workbench.action.openSettings?query=celeste.steamPath)"
-            
           },
           {
             "id": "celeste.install.everest",
@@ -95,50 +125,25 @@
             "description": "Install Everest to get started modding Celeste\n[Install Everest](https://everestapi.github.io/#installing-everest)"
           },
           {
-            "id": "celeste.schemas",
-            "title": "Install Everest",
-            "description": "Install Everest to get started modding Celeste\n[Install Everest](https://everestapi.github.io/#installing-everest)"
-          },
-          {
-            "id": "celeste.createMap",
-            "title": "Create a new map",
-            "description": "Create a new map for Celeste\n[Create Map](command:)",
-            "command": "celeste.createMap"
+            "id": "celeste.create-mod",
+            "title": "Create a new mod",
+            "description": "You're all set to get modding for Celeste.",
+            "command": "celeste.create-map"
           }
         ]
       },
       {
-        "id": "celeste.firstmod",
+        "id": "celeste.first-mod",
         "title": "First Mod",
-        "description": "Create your first Celeste mod with Everest."
+        "description": "Create your first Celeste mod with Everest.",
+        "steps": [
+          {
+            "id": "celeste.schemas",
+            "title": "",
+            "description": ""
+          }
+        ]
       }
     ]
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run package",
-    "clean": "rimraf out/",
-    "compile": "npm run clean && npm run copyfiles && node ./esbuild.mjs --esm",
-    "copyfiles": "copyfiles -f \"src/webviews/**/*.css\" assets/css/",
-    "package": "NODE_ENV=production npm run compile",
-    "watch": "node ./esbuild.mjs --watch --esm"
-  },
-  "devDependencies": {
-    "@types/node": "18.x",
-    "@types/uuid": "^9.0.8",
-    "@types/vscode": "^1.84.0",
-    "@types/vscode-webview": "^1.57.5",
-    "@vscode/test-electron": "^2.3.6",
-    "copyfiles": "^2.4.1",
-    "esbuild": "^0.16.17",
-    "eslint": "^8.52.0",
-    "glob": "^10.3.10",
-    "rimraf": "^5.0.5",
-    "typescript": "^5.2.2"
-  },
-  "dependencies": {
-    "@vscode/webview-ui-toolkit": "^1.4.0",
-    "path": "^0.12.7",
-    "steam-path": "^1.0.2",
-    "uuid": "^9.0.1"
   }
 }

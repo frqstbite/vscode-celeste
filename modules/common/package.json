@@ -1,0 +1,17 @@
+{
+  "name": "@vscode-celeste/common",
+  "version": "0.0.1",
+  "main": "out/index.js",
+  "types": "out/index.d.ts",
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -p . --watch",
+    "package": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5"
+  },
+  "dependencies": {
+    "@vscode-elements/elements": "^1.9.0"
+  }
+}

@@ -1,26 +1,20 @@
-import * as vscode from 'vscode';
+import { CelesteMap, Element } from 'celeste.js';
 import * as path from 'path';
+import * as vscode from 'vscode';
 
-import { Disposable } from '../utility/Disposable';
-import Element from './serialization/Element';
-import BinaryBuffer from './serialization/BinaryBuffer';
-import StringLookup from './serialization/StringLookup';
-import ElementTree from './serialization/ElementTree';
-
+import { Disposable } from './utility/Disposable';
 
 /**
  * CustomDocument for Celeste maps.
  * Handles serialization and edit tracking.
  */
 export default class CelesteMapDocument extends Disposable implements vscode.CustomDocument {
-	private static readonly header = "CELESTE MAP";
 
     public readonly uri: vscode.Uri;
     
-	private readonly _root: string;
-	public get root() { return this.getElement(this._root) }
+	public get root() { return this.getElement(this._map.root) }
 	
-	private _elements: ElementTree;
+	private _map: CelesteMap;
 	private _edits: vscode.CustomDocumentEditEvent<CelesteMapDocument>[] = [];
 	private _savedEdits: vscode.CustomDocumentEditEvent<CelesteMapDocument>[] = [];
 
@@ -41,22 +35,11 @@ export default class CelesteMapDocument extends Disposable implements vscode.Cus
 		super();
 
         this.uri = uri;
-
-		const buffer = new BinaryBuffer(data);
-		const header = buffer.readString();
-		if (header !== CelesteMapDocument.header) {
-			throw new Error(`Invalid header: ${header} (expected ${CelesteMapDocument.header})`);
-		}
-		
-		buffer.readString(); //Package name
-
-        const lookup = StringLookup.deserialize(buffer);
-		this._elements = ElementTree.fromBinary(buffer, lookup);
-		this._root = this._elements.root;
+		this._map = CelesteMap.fromBinary(data);
     }
 
 	getElement(id: string): Element | undefined {
-		return this._elements.getElement(id);
+		return this._map.getElement(id);
 	}
 
 	insertElement(parentId: string, id: string): void {
@@ -142,17 +125,13 @@ export default class CelesteMapDocument extends Disposable implements vscode.Cus
 	async saveAs(target: vscode.Uri, cancellation: vscode.CancellationToken): Promise<void> {
 		this._savedEdits = Array.from(this._edits); //Mark edits as saved
 
-        const lookup = new StringLookup();
-		const buffer = new BinaryBuffer();
-		buffer.writeString(CelesteMapDocument.header);
-		buffer.writeString(path.basename(target.path, path.extname(target.path))); //Package name
-        this.root?.toBinary(buffer, lookup);
+        const data =  this._map.toBinary(path.basename(target.path, path.extname(target.path)));
 
 		if (cancellation.isCancellationRequested) {
 			return;
 		}
 
-		await vscode.workspace.fs.writeFile(target, buffer.getData());
+		await vscode.workspace.fs.writeFile(target, data);
 	}
 
     async revert(_cancellation: vscode.CancellationToken): Promise<void> {

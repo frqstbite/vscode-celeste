@@ -2,14 +2,21 @@ import * as vscode from 'vscode';
 import { v1 } from 'uuid';
 
 import DocumentCollection from '../utility/DocumentCollection';
-import CelesteMapDocument from './CelesteMapDocument';
+import CelesteMapDocument from '../CelesteMapDocument';
 
 export default class MapEditorProvider implements vscode.CustomEditorProvider<CelesteMapDocument> {
-    public static readonly viewType = "celeste.mapViewport";
+    public static readonly viewType = 'celeste.mapViewport';
 
     public static activeDocument: CelesteMapDocument | undefined;
     private static readonly _onDidChangeActiveDocument = new vscode.EventEmitter<CelesteMapDocument | undefined>();
+    /**
+     * Fired when the active document changes.
+     */
     public static readonly onDidChangeActiveDocument = MapEditorProvider._onDidChangeActiveDocument.event;
+
+    public static activeWebview: vscode.WebviewPanel | undefined;
+    private static readonly _onDidChangeActiveWebview = new vscode.EventEmitter<vscode.WebviewPanel | undefined>();
+    public static readonly onDidChangeActiveWebview = MapEditorProvider._onDidChangeActiveWebview.event;
 
     public static register(extension: vscode.ExtensionContext): vscode.Disposable {
         return vscode.window.registerCustomEditorProvider(
@@ -113,17 +120,17 @@ export default class MapEditorProvider implements vscode.CustomEditorProvider<Ce
         const nonce = v1();
 
         return `<!DOCTYPE html>
-        <html lang="en">
+        <html lang='en'>
             <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} blob:; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
-                <link href=${styleUri} rel="stylesheet" />
+                <meta charset='UTF-8'>
+                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                <meta http-equiv='Content-Security-Policy' content='default-src 'none'; img-src ${webview.cspSource} blob:; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';'>
+                <link href=${styleUri} rel='stylesheet' />
                 <title>Celeste Map Editor</title>
             </head>
             <body>
-                <canvas id="viewport"></canvas>
-                <script type="module" src="${scriptUri}" nonce="${nonce}"></script>
+                <div id='app'></div>
+                <script type='module' src='${scriptUri}' nonce='${nonce}'></script>
             </body>
         </html>`;
     }
