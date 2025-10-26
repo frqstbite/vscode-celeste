@@ -6,7 +6,7 @@
   "scripts": {
     "compile": "tsc -p .",
     "watch": "tsc -p . --watch",
-    "package": "npm run build"
+    "package": "npm run compile"
   },
   "devDependencies": {
     "@types/node": "^22.7.5"
