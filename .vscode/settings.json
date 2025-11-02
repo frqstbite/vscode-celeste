@@ -8,14 +8,14 @@
     "vite.config.*": "jsconfig*, vitest.config.*, cypress.config.*, playwright.config.*"
   },
   "files.exclude": {
-    ".nx": false, // hide NX project files
-    "dist": false, // hide the folder with the built extension
-    "out": false // hide folders with the compiled JS files
+    "**/.nx": true, // hide NX project files
+    "**/dist": true, // hide the folder with the built extension
+    "**/out": true // hide folders with the compiled JS files
   },
   "search.exclude": {
-    ".nx": true,
-    "dist": true,
-    "out": true
+    "**/.nx": true,
+    "**/dist": true,
+    "**/out": true
   },
   // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
   "typescript.tsc.autoDetect": "off"
