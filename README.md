@@ -1,6 +1,6 @@
 # `vscode-celeste`: The Celeste tooling you've been waiting for.
 
-This extension contains a sleu of tools essential to expedient [Celeste](https://www.celestegame.com) modding with [Everest](https://everestapi.github.io). 
+This extension contains a sleu of tools essential to expedient [Celeste] modding with [Everest].
 
 - [Features](#features)
   - [Markup Schemas](#markup-schemas)
@@ -20,6 +20,7 @@ This extension contains a sleu of tools essential to expedient [Celeste](https:/
 Edit your mod's markup files comfortably with autocomplete and static validation.
 
 `vscode-celeste` contains out-of-the-box support for the following Celeste and Everest files:
+
 - `everest.yaml`
 - Map `.meta.yaml` files for annotating maps with Everest properties
 - `AnimatedTiles.xml`
@@ -33,37 +34,37 @@ Instead of a regular old text editor, you are presented with a suite of tools:
 
 #### Map Viewport
 
-
-
 #### Attribute Editor
 
 #### Map Graph
 
-Select 
+Select
 
 ### Markup-Based Plugin API
 
-[Ahorn](https://github.com/CelestialCartographers/Ahorn) plugins are written in [Julia](https://julialang.org).
+[Ahorn] plugins are written in [Julia].
 
-[Lönn](https://github.com/CelestialCartographers/Loenn) plugins are written in [Lua](https://www.lua.org). 
+[Lönn][loenn] plugins are written in [Lua].
 
-This extension is written in [TypeScript](https://www.typescriptlang.org).
-Does that mean you have to *learn the complexities of TypeScript* just to support this editor?
+This extension is written in [TypeScript].
+Does that mean you have to _learn the complexities of TypeScript_ just to support this editor?
 Of course not! `vscode-celeste`'s plugin API is entirely markup-based; you can write your plugin definitions in YAML, XML, or JSON.
-See the [Plugin Documentation]() for more information
+See the [Plugin Documentation][docs-plugins] for more information
 
 ## Requirements
 
-In order to take use this 
+In order to take use this
 
 ## Settings
 
 This extension doesn't contribute any settings right now. If it did, they would be listed like so:
 
 ### `vscode-celeste.enable`
+
 Enable/disable this extension.
 
 ### `vscode-celeste.thing`
+
 Set to `blah` to do something.
 
 ## Planned Features
@@ -77,7 +78,24 @@ Here are some features that you can expect to come in the future, in no particul
 - Launch Celeste directly into `.bin` file
 
 ## Contributing
-Issues and pull requests are welcome. 
+
+Issues and pull requests are welcome.
 
 ## License
-This extension and [its packages](/packages) are released under the MIT License. Refer to [the license file](/LICENSE) for more information.
+
+This extension and [its packages](/packages) are released under the MIT License. Refer to [the license file][license] for more information.
+
+<!-- External Links -->
+
+[celeste]: https://www.celestegame.com
+[everest]: https://everestapi.github.io
+[ahorn]: https://github.com/CelestialCartographers/Ahorn
+[julia]: https://julialang.org
+[loenn]: https://github.com/CelestialCartographers/Loenn
+[lua]: https://www.lua.org
+[typescript]: https://www.typescriptlang.org
+
+<!-- Project Links -->
+
+[docs-plugins]: about:blank
+[license]: /LICENSE
