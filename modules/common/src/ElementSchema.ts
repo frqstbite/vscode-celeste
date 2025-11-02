@@ -1,3 +1,1 @@
-export default class ElementSchema {
-    
-}
+export default class ElementSchema {}

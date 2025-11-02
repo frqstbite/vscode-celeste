@@ -1,9 +1,7 @@
 {
-    "include": [
-        "src/**/*"
-    ],
-    "compilerOptions": {
-        "outFile": "out/index.js",
-        "declaration": true
-    }
+	"compilerOptions": {
+		"declaration": true,
+		"outDir": "out",
+		"skipLibCheck": true
+	}
 }

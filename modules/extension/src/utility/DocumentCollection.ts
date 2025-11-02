@@ -5,7 +5,6 @@ import { Disposable } from './Disposable';
  * Tracks `CustomDocument`s and their associated webviews.
  */
 export default class DocumentCollection<T extends Disposable & vscode.CustomDocument> {
-
 	private readonly _documents = new Set<{
 		readonly resource: string;
 		readonly document: T;
@@ -51,7 +50,7 @@ export default class DocumentCollection<T extends Disposable & vscode.CustomDocu
 		};
 		this._documents.add(entry);
 
-		document.onDidDispose( () => this._documents.delete(entry) );
+		document.onDidDispose(() => this._documents.delete(entry));
 	}
 
 	/**
@@ -62,7 +61,7 @@ export default class DocumentCollection<T extends Disposable & vscode.CustomDocu
 		for (const entry of this._documents) {
 			if (entry.resource === key) {
 				entry.webviews.add(webview);
-				webview.onDidDispose( () => entry.webviews.delete(webview) );
+				webview.onDidDispose(() => entry.webviews.delete(webview));
 				return;
 			}
 		}

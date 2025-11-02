@@ -3,13 +3,13 @@
 This extension contains a sleu of tools essential to expedient [Celeste] modding with [Everest].
 
 - [Features](#features)
-  - [Markup Schemas](#markup-schemas)
-  - [Visual Map Editor](#visual-map-editor)
-  - [Markup-Based Plugin API](#markup-based-plugin-api)
+    - [Markup Schemas](#markup-schemas)
+    - [Visual Map Editor](#visual-map-editor)
+    - [Markup-Based Plugin API](#markup-based-plugin-api)
 - [Requirements](#requirements)
 - [Settings](#settings)
-  - [`vscode-celeste.enable`](#vscode-celesteenable)
-  - [`vscode-celeste.thing`](#vscode-celestething)
+    - [`vscode-celeste.enable`](#vscode-celesteenable)
+    - [`vscode-celeste.thing`](#vscode-celestething)
 - [Contributing](#contributing)
 - [License](#license)
 

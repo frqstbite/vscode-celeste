@@ -1,149 +1,154 @@
 {
-  "name": "vscode-celeste",
-  "version": "0.1.0",
-  "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "workspaces-run --parallel -- npm run compile",
-    "watch": "workspaces-run --parallel -- npm run watch",
-    "package": "workspaces-run --parallel -- npm run package"
-  },
-  "devDependencies": {
-    "workspaces-run": "^1.0.0"
-  },
-  "main": "dist/extension.cjs",
-  "description": "Must-have extension for Celeste modders working with Everest.",
-  "author": "frqstbite",
-  "homepage": "https://github.com/frqstbite/vscode-celeste#readme",
-  "license": "MIT",
-  "keywords": [
-    "celeste",
-    "vscode",
-    "extension",
-    "editor",
-    "map",
-    "maps"
-  ],
-  "workspaces": [
-    "modules/*"
-  ],
-  "engines": {
-    "vscode": "^1.96.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/frqstbite/vscode-celeste.git"
-  },
-  "bugs": {
-    "url": "https://github.com/frqstbite/vscode-celeste/issues"
-  },
-
-  "displayName": "Celeste",
-  "publisher": "frqstbite",
-  "icon": "assets/images/strawberry.png",
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "onStartupFinished"
-  ],
-  "contributes": {
-    "customEditors": [
-      {
-        "viewType": "celeste.map-viewport",
-        "displayName": "Celeste Map Editor",
-        "selector": [
-          {
-            "filenamePattern": "**/Maps/**/*.bin"
-          }
-        ]
-      }
-    ],
-    "jsonValidation": [
-      {
-        "fileMatch": "**/everest.json",
-        "url": "./assets/schemas/yaml/everest.json"
-      },
-      {
-        "fileMatch": "**/Maps/**/*.meta.json",
-        "url": "./assets/schemas/yaml/map.meta.json"
-      }
-    ],
-    "languages": [
-      {
-        "id": "celestemap",
-        "icon": {
-          "light": "assets/images/strawberry.png",
-          "dark": "assets/images/strawberry.png"
-        },
-        "extensions": [
-          ".bin"
-        ],
-        "filenamePatterns": [
-          "**/Maps/**/*.bin"
-        ]
-      }
-    ],
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "celeste",
-          "title": "Celeste",
-          "icon": "assets/images/strawberry-outline.png"
-        }
-      ]
-    },
-    "views": {
-      "celeste": [
-        {
-          "id": "celeste.map-graph",
-          "name": "Map Graph",
-          "type": "tree",
-          "when": "activeWebviewPanelId == celeste.map-viewport"
-        },
-        {
-          "id": "celeste.attribute-editor",
-          "name": "Attribute Editor",
-          "type": "webview",
-          "when": "activeWebviewPanelId == celeste.map-viewport"
-        }
-      ]
-    },
-    "walkthroughs": [
-      {
-        "id": "celeste.setup",
-        "title": "Celeste",
-        "description": "Celeste modding tools",
-        "steps": [
-          {
-            "id": "celeste.install.celeste",
-            "title": "Where is Celeste?",
-            "description": "We try our best to automatically detect Celeste's installation path. You can adjust it in settings at any time.\n[Settings](command:workbench.action.openSettings?query=celeste.steamPath)"
-          },
-          {
-            "id": "celeste.install.everest",
-            "title": "Install Everest",
-            "description": "Install Everest to get started modding Celeste\n[Install Everest](https://everestapi.github.io/#installing-everest)"
-          },
-          {
-            "id": "celeste.create-mod",
-            "title": "Create a new mod",
-            "description": "You're all set to get modding for Celeste.",
-            "command": "celeste.create-map"
-          }
-        ]
-      },
-      {
-        "id": "celeste.first-mod",
-        "title": "First Mod",
-        "description": "Create your first Celeste mod with Everest.",
-        "steps": [
-          {
-            "id": "celeste.schemas",
-            "title": "",
-            "description": ""
-          }
-        ]
-      }
-    ]
-  }
+	"name": "vscode-celeste",
+	"displayName": "Celeste",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Must-have extension for Celeste modders working with Everest.",
+	"categories": [
+		"Other"
+	],
+	"keywords": [
+		"celeste",
+		"vscode",
+		"extension",
+		"editor",
+		"map",
+		"maps"
+	],
+	"homepage": "https://github.com/frqstbite/vscode-celeste#readme",
+	"bugs": {
+		"url": "https://github.com/frqstbite/vscode-celeste/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/frqstbite/vscode-celeste.git"
+	},
+	"license": "MIT",
+	"author": "frqstbite",
+	"publisher": "frqstbite",
+	"main": "dist/extension.cjs",
+	"workspaces": [
+		"modules/*"
+	],
+	"scripts": {
+		"build": "lerna run build",
+		"format": "prettier --write '**/*.{js,ts,jsx,tsx,json,md,yml,yaml}'",
+		"package": "lerna run package",
+		"vscode:prepublish": "npm run package",
+		"watch": "lerna watch -- lerna run build --scope=$LERNA_PACKAGE_NAME --include-dependents"
+	},
+	"contributes": {
+		"customEditors": [
+			{
+				"viewType": "celeste.map-viewport",
+				"displayName": "Celeste Map Editor",
+				"selector": [
+					{
+						"filenamePattern": "**/Maps/**/*.bin"
+					}
+				]
+			}
+		],
+		"jsonValidation": [
+			{
+				"fileMatch": "**/everest.json",
+				"url": "./assets/schemas/yaml/everest.json"
+			},
+			{
+				"fileMatch": "**/Maps/**/*.meta.json",
+				"url": "./assets/schemas/yaml/map.meta.json"
+			}
+		],
+		"languages": [
+			{
+				"id": "celestemap",
+				"icon": {
+					"light": "assets/images/strawberry.png",
+					"dark": "assets/images/strawberry.png"
+				},
+				"extensions": [
+					".bin"
+				],
+				"filenamePatterns": [
+					"**/Maps/**/*.bin"
+				]
+			}
+		],
+		"views": {
+			"celeste": [
+				{
+					"id": "celeste.map-graph",
+					"name": "Map Graph",
+					"type": "tree",
+					"when": "activeWebviewPanelId == celeste.map-viewport"
+				},
+				{
+					"id": "celeste.attribute-editor",
+					"name": "Attribute Editor",
+					"type": "webview",
+					"when": "activeWebviewPanelId == celeste.map-viewport"
+				}
+			]
+		},
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "celeste",
+					"title": "Celeste",
+					"icon": "assets/images/strawberry-outline.png"
+				}
+			]
+		},
+		"walkthroughs": [
+			{
+				"id": "celeste.setup",
+				"title": "Celeste",
+				"description": "Celeste modding tools",
+				"steps": [
+					{
+						"id": "celeste.install.celeste",
+						"title": "Where is Celeste?",
+						"description": "We try our best to automatically detect Celeste's installation path. You can adjust it in settings at any time.\n[Settings](command:workbench.action.openSettings?query=celeste.steamPath)"
+					},
+					{
+						"id": "celeste.install.everest",
+						"title": "Install Everest",
+						"description": "Install Everest to get started modding Celeste\n[Install Everest](https://everestapi.github.io/#installing-everest)"
+					},
+					{
+						"id": "celeste.create-mod",
+						"title": "Create a new mod",
+						"description": "You're all set to get modding for Celeste.",
+						"command": "celeste.create-map"
+					}
+				]
+			},
+			{
+				"id": "celeste.first-mod",
+				"title": "First Mod",
+				"description": "Create your first Celeste mod with Everest.",
+				"steps": [
+					{
+						"id": "celeste.schemas",
+						"title": "",
+						"description": ""
+					}
+				]
+			}
+		]
+	},
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"devDependencies": {
+		"@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+		"lerna": "^9.0.0",
+		"prettier": "^3.6.2",
+		"prettier-plugin-packagejson": "^2.5.19",
+		"prettier-plugin-sort-json": "^4.1.1"
+	},
+	"engines": {
+		"vscode": "^1.96.0"
+	},
+	"icon": "assets/images/strawberry.png"
 }

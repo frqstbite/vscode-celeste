@@ -1,29 +1,29 @@
 {
-  "name": "@vscode-celeste/map-viewport",
-  "version": "0.0.1",
-  "type": "module",
-  "scripts": {
-    "compile": "conc \"vue-tsc --noEmit\" \"vite build\"",
-    "watch": "conc \"vue-tsc --noEmit --watch\" \"vite build --watch\"",
-    "package": "conc \"vue-tsc --noEmit\" \"vite build\""
-  },
-  "dependencies": {
-    "@vscode-elements/elements": "^1.9.0",
-    "pixi.js": "^8.6.6",
-    "vue": "^3.5.13",
-    "vue3-pixi": "^0.7.6"
-  },
-  "devDependencies": {
-    "@tsconfig/node22": "^22.0.0",
-    "@types/node": "^22.9.3",
-    "@vitejs/plugin-vue": "^5.2.1",
-    "@vitejs/plugin-vue-jsx": "^4.1.1",
-    "@vue/tsconfig": "^0.7.0",
-    "concurrently": "^9.1.0",
-    "glob": "^11.0.0",
-    "typescript": "^5.5.4",
-    "vite": "^6.0.1",
-    "vite-plugin-vue-devtools": "^7.6.5",
-    "vue-tsc": "^2.1.10"
-  }
+	"name": "@vscode-celeste/map-viewport",
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"build": "conc \"vue-tsc --noEmit\" \"vite build\"",
+		"package": "conc \"vue-tsc --noEmit\" \"vite build\"",
+		"watch": "conc \"vue-tsc --noEmit --watch\" \"vite build --watch\""
+	},
+	"dependencies": {
+		"@vscode-elements/elements": "^1.9.0",
+		"pixi.js": "^8.6.6",
+		"vue": "^3.5.13",
+		"vue3-pixi": "^0.7.6"
+	},
+	"devDependencies": {
+		"@tsconfig/node22": "^22.0.0",
+		"@types/node": "^22.9.3",
+		"@vitejs/plugin-vue": "^5.2.1",
+		"@vitejs/plugin-vue-jsx": "^4.1.1",
+		"@vue/tsconfig": "^0.7.0",
+		"concurrently": "^9.1.0",
+		"glob": "^11.0.0",
+		"typescript": "^5.5.4",
+		"vite": "^6.0.1",
+		"vite-plugin-vue-devtools": "^7.6.5",
+		"vue-tsc": "^2.1.10"
+	}
 }

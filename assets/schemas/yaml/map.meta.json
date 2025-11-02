@@ -1,264 +1,264 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "Everest Map Metadata Schema",
-    "description": "Describes map metadata.",
+	"$defs": {
+		"audioEvent": {
+			"pattern": "^event:(?:\/[A-Za-z0-9_]+)+$",
+			"type": "string"
+		},
 
-    "type": "object",
-    "properties": {
-        "Icon": {
-            "type": "string",
-            "description": "Icon for this chapter in the menu."
-        },
+		"mapMetadata": {
+			"properties": {
+				"AudioState": {
+					"properties": {
+						"Ambience": { "$ref": "#/$defs/audioEvent" },
+						"Music": { "$ref": "#/$defs/audioEvent" }
+					},
+					"required": ["Music", "Ambience"],
+					"type": "object"
+				},
 
-        "Interlude": {
-            "type": "boolean",
-            "description": "Whether this chapter is an interlude chapter. Interlude chapters have no chapter number, strawberries, death counts, nor sides."
-        },
+				"HeartIsEnd": {
+					"description": "Whether collecting the crystal heart ends this map.",
+					"type": "boolean"
+				},
 
-        "CassetteCheckpointIndex": {
-            "type": "integer",
-            "minimum": 0,
-            "deprecated": true,
-            "description": "Automatically determined by Everest."
-        },
+				"Inventory": {
+					"description": "Determines dash count and dream block activation.",
+					"enum": ["Default"],
+					"type": "string"
+				},
 
-        "TitleBaseColor": {
-            "type": "string",
-            "description": "Base color for chapter card in the menu."
-        },
+				"SeekerSlowdown": {
+					"default": false,
+					"description": "Whether time slows down when seekers get close to the player.",
+					"type": "boolean"
+				}
+			},
+			"required": ["AudioState", "Inventory", "SeekerSlowdown"],
+			"type": "object"
+		},
 
-        "TitleAccentColor": {
-            "type": "string",
-            "description": "Accent color for chapter card in the menu."
-        },
+		"ray3d": {
+			"properties": {
+				"Position": { "$ref": "#/$defs/vector3" },
+				"Target": { "$ref": "#/$defs/vector3" }
+			},
+			"required": ["Position", "Target"],
+			"type": "object"
+		},
 
-        "TitleTextColor": {
-            "type": "string",
-            "description": "Text color for chapter card in the menu."
-        },
+		"screenDefinition": {
+			"Atlas": {
+				"description": "Atlas to use for this screen.",
+				"type": "string"
+			},
 
-        "IntroType": {
-            "type": "string",
-            "enum": [ "WalkInRight", "Jump", "WakeUp" ],
-            "description": "Descriptor for how Player object should behave on map start."
-        },
+			"Center": { "$ref": "#/$defs/vector2" },
+			"Layers": {
+				"items": {
+					"properties": {
+						"Alpha": {
+							"maximum": 1,
+							"minimum": 0,
+							"type": "number"
+						},
+						"Images": {
+							"items": { "type": "string" },
+							"type": "array"
+						},
+						"Position": { "$ref": "#/$defs/vector2" },
+						"Scale": { "type": "number" },
+						"Scroll": {
+							"items": { "type": "number" },
+							"minItems": 1,
+							"type": "array"
+						},
+						"Speed": { "$ref": "#/$defs/vector2" },
+						"Type": {
+							"enum": ["layer", "ui"],
+							"type": "string"
+						}
+					},
+					"required": ["Type"],
+					"type": "object"
+				},
+				"type": "array"
+			},
+			"Start": { "$ref": "#/$defs/vector2" }
+		},
+		"vector2": {
+			"items": {
+				"type": "number"
+			},
+			"maxItems": 2,
+			"minItems": 2,
+			"type": "array"
+		},
 
-        "Dreaming": {
-            "type": "boolean",
-            "description": "Whether this map is a dream map."
-        },
+		"vector3": {
+			"items": {
+				"type": "number"
+			},
+			"maxItems": 3,
+			"minItems": 3,
+			"type": "array"
+		}
+	},
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"description": "Describes map metadata.",
 
-        "ColorGrade": {
-            "type": "string",
-            "description": "Color grade for this map."
-        },
+	"properties": {
+		"BloomBase": {
+			"description": "Base bloom value. Influences how much bloom is emitted from geometry.",
+			"minimum": 0,
+			"type": "number"
+		},
 
-        "Wipe": {
-            "type": "string",
-            "anyOf": [
-                { "enum": [
-                    "Celeste.CurtainWipe",
-                    "Celeste.AngledWipe",
-                    "Celeste.DreamWipe",
-                    "Celeste.KeyDoorWipe",
-                    "Celeste.WindWipe",
-                    "Celeste.DropWipe",
-                    "Celeste.FallWipe",
-                    "Celeste.MountainWipe",
-                    "Celeste.HeartWipe",
-                    "Celeste.StarfieldWipe"
-                ]},
-                { "type": "string" }
-            ],
-            "description": "Death effect that appears when the player dies."
-        },
+		"BloomStrength": {
+			"description": "Strength of bloom effect. Effectively a multiplier for the bloom value.",
+			"minimum": 0,
+			"type": "number"
+		},
 
-        "DarknessAlpha": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1,
-            "description": "Alpha value for darkness overlay. "
-        },
+		"CassetteCheckpointIndex": {
+			"deprecated": true,
+			"description": "Automatically determined by Everest.",
+			"minimum": 0,
+			"type": "integer"
+		},
 
-        "BloomBase": {
-            "type": "number",
-            "minimum": 0,
-            "description": "Base bloom value. Influences how much bloom is emitted from geometry."
-        },
+		"CassetteNoteColor": {
+			"type": "string"
+		},
 
-        "BloomStrength": {
-            "type": "number",
-            "minimum": 0,
-            "description": "Strength of bloom effect. Effectively a multiplier for the bloom value."
-        },
+		"CassetteSong": { "$ref": "#/$defs/audioEvent" },
 
-        "Jumpthru": {
-            "type": "string",
-            "deprecated": true,
-            "description": "Style of jumpthrus on this map. Not needed by custom maps."
-        },
+		"ColorGrade": {
+			"description": "Color grade for this map.",
+			"type": "string"
+		},
 
-        "CoreMode": {
-            "type": "string",
-            "enum": [ "Hot", "Cold" ],
-            "description": "Core mode this map starts on."
-        },
+		"CompleteScreen": { "$ref": "#/$defs/screenDefinition" },
+		"CoreMode": {
+			"description": "Core mode this map starts on.",
+			"enum": ["Hot", "Cold"],
+			"type": "string"
+		},
 
-        "CassetteNoteColor": {
-            "type": "string"
-        },
+		"DarknessAlpha": {
+			"description": "Alpha value for darkness overlay. ",
+			"maximum": 1,
+			"minimum": 0,
+			"type": "number"
+		},
 
-        "CassetteSong": { "$ref": "#/$defs/audioEvent" },
+		"Dreaming": {
+			"description": "Whether this map is a dream map.",
+			"type": "boolean"
+		},
 
-        "Modes": {
-            "type": "array",
-            "item": { "$ref": "#/$defs/mapMetadata" },
-            "minimum": 1,
-            "maximum": 3,
-            "description": "Metadata for A-, B-, and C-side, respectively."
-        },
+		"Icon": {
+			"description": "Icon for this chapter in the menu.",
+			"type": "string"
+		},
 
-        "OverrideASideMeta": {
-            "type": "boolean",
-            "description": "Whether to override the metadata of the A side. Only applicable to B- and C-sides."
-        },
+		"Interlude": {
+			"description": "Whether this chapter is an interlude chapter. Interlude chapters have no chapter number, strawberries, death counts, nor sides.",
+			"type": "boolean"
+		},
 
-        "Mountain": {
-            "type": "object",
-            "description": "Definitions for how the 3D viewport in the menu should appear.",
-            "properties": {
-                "Idle": { "$ref": "#/$defs/ray3d" },
-                "Select": { "$ref": "#/$defs/ray3d" },
-                "Zoom": { "$ref": "#/$defs/ray3d" },
-                "Cursor": { "$ref": "#/$defs/vector3" },
-                "State": {
-                    "type": "number",
-                    "default": 0
-                },
-                "ShowCore": {
-                    "type": "boolean",
-                    "description": "Whether the core is visible on the mountain while this chapter is selected."
-                }
-            }
-        },
+		"IntroType": {
+			"description": "Descriptor for how Player object should behave on map start.",
+			"enum": ["WalkInRight", "Jump", "WakeUp"],
+			"type": "string"
+		},
 
-        "LoadingVignetteText": {
-            "type": "object",
-            "properties": {
-                "Dialog": {
-                    "type": "string",
-                    "description": "ID of dialog to display on the loading vignette. Used for Intro and 8A."
-                }
-            }
-        },
+		"Jumpthru": {
+			"deprecated": true,
+			"description": "Style of jumpthrus on this map. Not needed by custom maps.",
+			"type": "string"
+		},
 
-        "LoadingVignetteScreen": { "$ref": "#/$defs/screenDefinition" },
-        "CompleteScreen": { "$ref": "#/$defs/screenDefinition" }
-    },
+		"LoadingVignetteScreen": { "$ref": "#/$defs/screenDefinition" },
+		"LoadingVignetteText": {
+			"properties": {
+				"Dialog": {
+					"description": "ID of dialog to display on the loading vignette. Used for Intro and 8A.",
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
 
-    "$defs": {
-        "vector3": {
-            "type": "array",
-            "items": {
-                "type": "number"
-            },
-            "minItems": 3,
-            "maxItems": 3
-        },
+		"Modes": {
+			"description": "Metadata for A-, B-, and C-side, respectively.",
+			"item": { "$ref": "#/$defs/mapMetadata" },
+			"maximum": 3,
+			"minimum": 1,
+			"type": "array"
+		},
 
-        "vector2": {
-            "type": "array",
-            "items": {
-                "type": "number"
-            },
-            "minItems": 2,
-            "maxItems": 2
-        },
-        
-        "ray3d": {
-            "type": "object",
-            "properties": {
-                "Position": { "$ref": "#/$defs/vector3" },
-                "Target": { "$ref": "#/$defs/vector3" }
-            },
-            "required": [ "Position", "Target" ]
-        },
+		"Mountain": {
+			"description": "Definitions for how the 3D viewport in the menu should appear.",
+			"properties": {
+				"Cursor": { "$ref": "#/$defs/vector3" },
+				"Idle": { "$ref": "#/$defs/ray3d" },
+				"Select": { "$ref": "#/$defs/ray3d" },
+				"ShowCore": {
+					"description": "Whether the core is visible on the mountain while this chapter is selected.",
+					"type": "boolean"
+				},
+				"State": {
+					"default": 0,
+					"type": "number"
+				},
+				"Zoom": { "$ref": "#/$defs/ray3d" }
+			},
+			"type": "object"
+		},
 
-        "audioEvent": {
-            "type": "string",
-            "pattern": "^event:(?:\/[A-Za-z0-9_]+)+$"
-        },
+		"OverrideASideMeta": {
+			"description": "Whether to override the metadata of the A side. Only applicable to B- and C-sides.",
+			"type": "boolean"
+		},
 
-        "mapMetadata": {
-            "type": "object",
-            "properties": {
-                "AudioState": {
-                    "type": "object",
-                    "properties": {
-                        "Music": { "$ref": "#/$defs/audioEvent" },
-                        "Ambience": { "$ref": "#/$defs/audioEvent" }
-                    },
-                    "required": [ "Music", "Ambience" ]
-                },
+		"TitleAccentColor": {
+			"description": "Accent color for chapter card in the menu.",
+			"type": "string"
+		},
 
-                "Inventory": {
-                    "type": "string",
-                    "enum": [ "Default" ],
-                    "description": "Determines dash count and dream block activation."
-                },
+		"TitleBaseColor": {
+			"description": "Base color for chapter card in the menu.",
+			"type": "string"
+		},
 
-                "HeartIsEnd": {
-                    "type": "boolean",
-                    "description": "Whether collecting the crystal heart ends this map."
-                },
+		"TitleTextColor": {
+			"description": "Text color for chapter card in the menu.",
+			"type": "string"
+		},
 
-                "SeekerSlowdown": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Whether time slows down when seekers get close to the player."
-                }
-            },
-            "required": [ "AudioState", "Inventory", "SeekerSlowdown" ]
-        },
+		"Wipe": {
+			"anyOf": [
+				{
+					"enum": [
+						"Celeste.CurtainWipe",
+						"Celeste.AngledWipe",
+						"Celeste.DreamWipe",
+						"Celeste.KeyDoorWipe",
+						"Celeste.WindWipe",
+						"Celeste.DropWipe",
+						"Celeste.FallWipe",
+						"Celeste.MountainWipe",
+						"Celeste.HeartWipe",
+						"Celeste.StarfieldWipe"
+					]
+				},
+				{ "type": "string" }
+			],
+			"description": "Death effect that appears when the player dies.",
+			"type": "string"
+		}
+	},
 
-        "screenDefinition": {
-            "Atlas": {
-                "type": "string",
-                "description": "Atlas to use for this screen."
-            },
-
-            "Start": { "$ref": "#/$defs/vector2" },
-            "Center": { "$ref": "#/$defs/vector2" },
-            "Layers": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "Type": {
-                            "type": "string",
-                            "enum": [ "layer", "ui" ]
-                        },
-                        "Images": {
-                            "type": "array",
-                            "items": { "type": "string" }
-                        },
-                        "Position": { "$ref": "#/$defs/vector2" },
-                        "Scroll": {
-                            "type": "array",
-                            "items": { "type": "number" },
-                            "minItems": 1
-                        },
-                        "Scale": { "type": "number" },
-                        "Alpha": {
-                            "type": "number",
-                            "minimum": 0,
-                            "maximum": 1
-                        },
-                        "Speed": { "$ref": "#/$defs/vector2" }
-                    },
-                    "required": [ "Type" ]
-                }
-            }
-        }
-    }
+	"title": "Everest Map Metadata Schema",
+	"type": "object"
 }

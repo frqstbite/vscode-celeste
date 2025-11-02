@@ -1,7 +1,6 @@
-import { CelesteMap, Element } from 'celeste.js';
 import * as path from 'path';
+import { CelesteMap, Element } from '@vscode-celeste/common';
 import * as vscode from 'vscode';
-
 import { Disposable } from './utility/Disposable';
 
 /**
@@ -9,34 +8,40 @@ import { Disposable } from './utility/Disposable';
  * Handles serialization and edit tracking.
  */
 export default class CelesteMapDocument extends Disposable implements vscode.CustomDocument {
+	public readonly uri: vscode.Uri;
 
-    public readonly uri: vscode.Uri;
-    
-	public get root() { return this.getElement(this._map.root) }
-	
+	public get root() {
+		return this.getElement(this._map.root);
+	}
+
 	private _map: CelesteMap;
 	private _edits: vscode.CustomDocumentEditEvent<CelesteMapDocument>[] = [];
 	private _savedEdits: vscode.CustomDocumentEditEvent<CelesteMapDocument>[] = [];
 
-    private readonly _onDidChangeContent = this._register(new vscode.EventEmitter<vscode.CustomDocumentEditEvent<CelesteMapDocument>>());
+	private readonly _onDidChangeContent = this._register(
+		new vscode.EventEmitter<vscode.CustomDocumentEditEvent<CelesteMapDocument>>()
+	);
 	/**
 	 * Fired when the document is modified.
 	 */
 	public readonly onDidChangeContent = this._onDidChangeContent.event;
 
-	static async open(uri: vscode.Uri, context: vscode.CustomDocumentOpenContext): Promise<CelesteMapDocument> {
-		const data =  context.untitledDocumentData || await vscode.workspace.fs.readFile(uri);
+	static async open(
+		uri: vscode.Uri,
+		context: vscode.CustomDocumentOpenContext
+	): Promise<CelesteMapDocument> {
+		const data = context.untitledDocumentData || (await vscode.workspace.fs.readFile(uri));
 		const map = new CelesteMapDocument(uri, data);
 
 		return map;
 	}
 
-    constructor(uri: vscode.Uri, data: Uint8Array) {
+	constructor(uri: vscode.Uri, data: Uint8Array) {
 		super();
 
-        this.uri = uri;
+		this.uri = uri;
 		this._map = CelesteMap.fromBinary(data);
-    }
+	}
 
 	getElement(id: string): Element | undefined {
 		return this._map.getElement(id);
@@ -58,12 +63,12 @@ export default class CelesteMapDocument extends Disposable implements vscode.Cus
 			redo: () => {
 				this._edits.push(edit);
 				element.setParent(parent);
-			}
+			},
 		};
 		edit.redo();
 		this._onDidChangeContent.fire(edit);
 	}
-	
+
 	changeElement(id: string, changes: { [key: string]: any }): void {
 		const element = this.getElement(id);
 		if (!element) throw new Error(`Element with id ${id} not found`);
@@ -89,7 +94,7 @@ export default class CelesteMapDocument extends Disposable implements vscode.Cus
 				for (const key in newValues) {
 					element.setAttribute(key, newValues[key]);
 				}
-			}
+			},
 		};
 		edit.redo();
 		this._onDidChangeContent.fire(edit);
@@ -112,20 +117,20 @@ export default class CelesteMapDocument extends Disposable implements vscode.Cus
 			redo: () => {
 				this._edits.push(edit);
 				element.delete();
-			}
+			},
 		};
 		edit.redo();
 		this._onDidChangeContent.fire(edit);
 	}
 
-    async save(cancellation: vscode.CancellationToken): Promise<void> {
+	async save(cancellation: vscode.CancellationToken): Promise<void> {
 		await this.saveAs(this.uri, cancellation);
 	}
 
 	async saveAs(target: vscode.Uri, cancellation: vscode.CancellationToken): Promise<void> {
 		this._savedEdits = Array.from(this._edits); //Mark edits as saved
 
-        const data =  this._map.toBinary(path.basename(target.path, path.extname(target.path)));
+		const data = this._map.toBinary(path.basename(target.path, path.extname(target.path)));
 
 		if (cancellation.isCancellationRequested) {
 			return;
@@ -134,14 +139,17 @@ export default class CelesteMapDocument extends Disposable implements vscode.Cus
 		await vscode.workspace.fs.writeFile(target, data);
 	}
 
-    async revert(_cancellation: vscode.CancellationToken): Promise<void> {
+	async revert(_cancellation: vscode.CancellationToken): Promise<void> {
 		// Undo edits until its present in the saved edits
 		while (this._edits.length > this._savedEdits.length) {
 			this._edits.pop()?.undo();
 		}
-    }
+	}
 
-    async backup(destination: vscode.Uri, cancellation: vscode.CancellationToken): Promise<vscode.CustomDocumentBackup> {
+	async backup(
+		destination: vscode.Uri,
+		cancellation: vscode.CancellationToken
+	): Promise<vscode.CustomDocumentBackup> {
 		await this.saveAs(destination, cancellation);
 
 		return {
@@ -152,7 +160,7 @@ export default class CelesteMapDocument extends Disposable implements vscode.Cus
 				} catch {
 					// noop
 				}
-			}
+			},
 		};
 	}
 }
